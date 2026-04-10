@@ -1,0 +1,19 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    ".yarn/": true,
+    "node_modules/": true
+  },
+  // make sure TS auto-imports have the file extension (required for node)
+  "typescript.preferences.importModuleSpecifierEnding": "js",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always",
+    "source.addMissingImports.ts": "always",
+    "source.fixAll.prettier": "always"
+  },
+  "typescript.preferences.organizeImports": {
+    "caseSensitivity": "caseInsensitive",
+    "typeOrder": "last"
+  }
+}
