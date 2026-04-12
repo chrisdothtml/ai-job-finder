@@ -6,8 +6,9 @@ import { dedent, getGeoLocation, ollamaChat } from './utils.ts';
 const DATA_DIR = path.resolve(import.meta.dirname, '../.data');
 
 interface JobFitResponse {
-  goodFit: boolean;
-  reasoning: string;
+  fitScore: number;
+  pros: string;
+  cons: string;
 }
 
 async function generateSysPrompt(resume: string, prefs: string) {
@@ -18,18 +19,18 @@ async function generateSysPrompt(resume: string, prefs: string) {
     Your job is to determine whether a given job posting is a good fit for the user, based on their location, resume, and job preferences listed below.
 
     ## Output format
-    You should output using JSON format, here are some example responses:
+    You should output using JSON format, reasoning should be kept brief and not overly wordy; here are some example responses:
 
     \`\`\`json
-    { "goodFit": true, "reasoning": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company" }
+    { "fitScore": 1, "pros": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company", "cons": "" }
     \`\`\`
 
     \`\`\`json
-    { "goodFit": false, "reasoning": "Job is fully on-site, which user has explicitly stated they aren't interested in" }
+    { "fitScore": 0.25, "pros": "Job is a good match for the user's experience", "cons": "Job is fully on-site, which the user has explicitly stated they aren't interested in" }
     \`\`\`
 
     \`\`\`json
-    { "goodFit": false, "reasoning": "Job is based outside of the user's country" }
+    { "fitScore": 0, "pros": "", "cons": "Job is based outside of the user's country" }
     \`\`\`
 
     # User information
@@ -45,7 +46,7 @@ async function generateSysPrompt(resume: string, prefs: string) {
   result += resume;
   result += `\n\`\`\`\``;
 
-  result += `\n\n## Job preferences\n`;
+  result += `\n\n## Job preferences (**IMPORTANT**)\n`;
   result += `\`\`\`\`md\n`;
   result += prefs;
   result += `\n\`\`\`\``;
