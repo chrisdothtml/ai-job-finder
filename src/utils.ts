@@ -82,12 +82,18 @@ export interface OllamaOptions {
   grammar?: string; // BNF grammar constraint
 }
 
+// built-in recommended settings for models
+export const modelPresets: { [model: string]: OllamaOptions } = {
+  'gemma4:e4b': { temperature: 1.0, top_p: 0.95, top_k: 64 },
+} as const;
+
 export async function ollamaChat<T>(
   model: string,
   messages: OllamaMessage[],
   opts: OllamaOptions = {}
 ): Promise<T> {
-  const host = getEnv('OLLAMA_HOST') || 'http://localhost:11434';
+  const host = getEnv('OLLAMA_HOST', 'http://localhost:11434');
+  const presetOpts = modelPresets[model] ?? {};
   const response = await fetch(`${host}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -96,7 +102,7 @@ export async function ollamaChat<T>(
       messages,
       stream: false,
       format: 'json',
-      options: opts,
+      options: { ...presetOpts, ...opts },
     }),
   });
 

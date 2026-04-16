@@ -79,15 +79,10 @@ async function main() {
   );
 
   console.log(
-    await ollamaChat<JobFitResponse>(
-      'gemma4:e4b',
-      [
+    await ollamaChat<JobFitResponse>('gemma4:e4b', [
         { role: 'system', content: await generateSysPrompt(resume, prefs) },
         { role: 'user', content: job },
-      ],
-      // recommended `gemma4:e4b` params
-      { temperature: 1.0, top_p: 0.95, top_k: 64 }
-    )
+    ])
   );
 }
 
