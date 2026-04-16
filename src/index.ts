@@ -10,6 +10,16 @@ interface JobFitResponse {
   pros: string;
   cons: string;
 }
+const JobFitResponseStr = `
+interface JobFitResponse {
+  fitScore: number;
+  pros: string;
+  cons: string;
+}
+`
+  .replaceAll('  ', '')
+  .replace(/\n/g, ' ')
+  .trim();
 
 async function generateSysPrompt(resume: string, prefs: string) {
   const geo = await getGeoLocation();
@@ -19,7 +29,12 @@ async function generateSysPrompt(resume: string, prefs: string) {
     Your job is to determine whether a given job posting is a good fit for the user, based on their location, resume, and job preferences listed below.
 
     ## Output format
-    You should output using JSON format, reasoning should be kept brief and not overly wordy; here are some example responses:
+    You should output using JSON format, using ONLY this schema:
+    \`\`\`typescript
+    ${JobFitResponseStr}
+    \`\`\`
+
+    Reasoning should be kept brief and not overly wordy; here are some example responses:
 
     \`\`\`json
     { "fitScore": 1, "pros": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company", "cons": "" }
@@ -64,10 +79,15 @@ async function main() {
   );
 
   console.log(
-    await ollamaChat<JobFitResponse>('gemma4:e4b', [
-      { role: 'system', content: await generateSysPrompt(resume, prefs) },
-      { role: 'user', content: job },
-    ])
+    await ollamaChat<JobFitResponse>(
+      'gemma4:e4b',
+      [
+        { role: 'system', content: await generateSysPrompt(resume, prefs) },
+        { role: 'user', content: job },
+      ],
+      // recommended `gemma4:e4b` params
+      { temperature: 1.0, top_p: 0.95, top_k: 64 }
+    )
   );
 }
 

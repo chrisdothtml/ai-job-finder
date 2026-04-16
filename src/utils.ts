@@ -28,7 +28,9 @@ export interface GeoLocation {
 export async function getGeoLocation(): Promise<GeoLocation> {
   const response = await fetch('http://ip-api.com/json');
   if (!response.ok) {
-    throw new Error(`GeoLocation request failed: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `GeoLocation request failed: ${response.status} ${response.statusText}`
+    );
   }
   return response.json() as Promise<GeoLocation>;
 }
@@ -38,12 +40,55 @@ export interface OllamaMessage {
   content: string;
 }
 
+export interface OllamaOptions {
+  // Sampling
+  temperature?: number; // randomness (0 = deterministic)
+  top_k?: number; // limit vocab to top K tokens
+  top_p?: number; // nucleus sampling
+  min_p?: number; // minimum probability cutoff
+  typical_p?: number; // typical sampling
+  repeat_penalty?: number;
+  repeat_last_n?: number;
+  presence_penalty?: number;
+  frequency_penalty?: number;
+
+  // Generation limits
+  num_predict?: number; // max tokens to generate
+  stop?: string[]; // stop sequences
+
+  // Performance / threading
+  num_ctx?: number; // context window size
+  num_batch?: number;
+  num_thread?: number;
+
+  // GPU / hardware
+  num_gpu?: number;
+  main_gpu?: number;
+  low_vram?: boolean;
+  f16_kv?: boolean;
+  logits_all?: boolean;
+  vocab_only?: boolean;
+  use_mmap?: boolean;
+  use_mlock?: boolean;
+
+  // Misc
+  seed?: number; // deterministic runs
+  mirostat?: number; // 0=off, 1=mirostat, 2=mirostat v2
+  mirostat_tau?: number;
+  mirostat_eta?: number;
+  penalize_newline?: boolean;
+
+  // Advanced / model-specific
+  grammar?: string; // BNF grammar constraint
+}
+
 export async function ollamaChat<T>(
   model: string,
   messages: OllamaMessage[],
-  baseUrl = getEnv('OLLAMA_HOST') || 'http://localhost:11434'
+  opts: OllamaOptions = {}
 ): Promise<T> {
-  const response = await fetch(`${baseUrl}/api/chat`, {
+  const host = getEnv('OLLAMA_HOST') || 'http://localhost:11434';
+  const response = await fetch(`${host}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -51,6 +96,7 @@ export async function ollamaChat<T>(
       messages,
       stream: false,
       format: 'json',
+      options: opts,
     }),
   });
 
@@ -61,7 +107,7 @@ export async function ollamaChat<T>(
   }
 
   const data = (await response.json()) as { message: { content: string } };
-  return JSON.parse(data.message.content) as T;
+  return JSON.parse(data.message.content.replace(/^```json|```$/g, '')) as T;
 }
 
 /**
