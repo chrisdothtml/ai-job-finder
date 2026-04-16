@@ -1,3 +1,13 @@
+import process from 'node:process';
+
+export function getEnv(key: string, fallback?: string): string | null {
+  if (process.env.hasOwnProperty(key)) {
+    return process.env[key] as string;
+  }
+
+  return fallback ?? null;
+}
+
 export interface GeoLocation {
   status: 'success' | 'fail';
   country: string;
@@ -31,7 +41,7 @@ export interface OllamaMessage {
 export async function ollamaChat<T>(
   model: string,
   messages: OllamaMessage[],
-  baseUrl = 'http://localhost:11434'
+  baseUrl = getEnv('OLLAMA_HOST') || 'http://localhost:11434'
 ): Promise<T> {
   const response = await fetch(`${baseUrl}/api/chat`, {
     method: 'POST',
