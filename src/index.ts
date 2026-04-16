@@ -34,7 +34,7 @@ async function generateSysPrompt(resume: string, prefs: string) {
     ${JobFitResponseStr}
     \`\`\`
 
-    Reasoning should be kept brief and not overly wordy; here are some example responses:
+    Reasoning should be kept very brief and not overly wordy; the user will be viewing your assessment in a list of many analyzed jobs, so they should be able to quickly breeze past your reasoning for each job; keep it short and to-the-point. Here are some example responses:
 
     \`\`\`json
     { "fitScore": 1, "pros": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company", "cons": "" }
@@ -47,6 +47,9 @@ async function generateSysPrompt(resume: string, prefs: string) {
     \`\`\`json
     { "fitScore": 0, "pros": "", "cons": "Job is based outside of the user's country" }
     \`\`\`
+
+    ## Responsibility
+    The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that.
 
     # User information
 
@@ -80,8 +83,8 @@ async function main() {
 
   console.log(
     await ollamaChat<JobFitResponse>('gemma4:e4b', [
-        { role: 'system', content: await generateSysPrompt(resume, prefs) },
-        { role: 'user', content: job },
+      { role: 'system', content: await generateSysPrompt(resume, prefs) },
+      { role: 'user', content: job },
     ])
   );
 }
