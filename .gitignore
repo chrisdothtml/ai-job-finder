@@ -1,4 +1,5 @@
 .env
+.remember
 .yarn
 node_modules
 TODO.md
