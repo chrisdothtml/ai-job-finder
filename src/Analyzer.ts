@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { dataDir } from './constants.ts';
 import { ListedJobStr, type ListedJob } from './scraping/Scraper.ts';
 import { inlineInterface } from './types.ts';
 import {
@@ -9,14 +10,12 @@ import {
   type GeoLocation,
 } from './utils.ts';
 
-const DATA_DIR = path.resolve(import.meta.dirname, '../.data');
-
-interface JobFitResponse {
+export interface JobFitResponse {
   fitScore: number;
   pros: string;
   cons: string;
 }
-const JobFitResponseStr = inlineInterface(`
+export const JobFitResponseStr = inlineInterface(`
 interface JobFitResponse {
   fitScore: number;
   pros: string;
@@ -24,7 +23,7 @@ interface JobFitResponse {
 }
 `);
 
-type ListedJobSansUrl = Omit<ListedJob, 'url'>;
+type ListedJobSansId = Omit<ListedJob, 'id'>;
 
 export class Analyzer {
   static jobAnalyzePrompt = dedent(`
@@ -52,7 +51,7 @@ export class Analyzer {
     \`\`\`
 
     ## Responsibility
-    The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that.
+    The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that. **IMPORTANT** Also note that if the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states that they're open to travel or move for a job, ASSUME THEY ARE NOT OPEN TO THAT.
   `);
   static reduceJobListPrompt = dedent(`
     # Purpose
@@ -102,6 +101,8 @@ export class Analyzer {
       {"title":"Software Engineer","location":"London, UK"}
     ]
     \`\`\`
+
+    **NOTE**: some job listings provide the location in the job title, and instead use the \`location\` field to indicate whether it's in-office, remote, etc.; so make sure to look in the \`title\` if the \`location\` isn't clear.
   `);
 
   // TODO: somehow make this configurable and not necessarily ollama (e.g. chatgpt, claude)
@@ -113,8 +114,8 @@ export class Analyzer {
     this.userInfoPrompt = this.generateUserInfoPrompt.apply(
       this,
       await Promise.all([
-        fs.readFile(path.join(DATA_DIR, 'resume.md'), 'utf-8'),
-        fs.readFile(path.join(DATA_DIR, 'job-preferences.md'), 'utf-8'),
+        fs.readFile(path.join(dataDir, 'resume.md'), 'utf-8'),
+        fs.readFile(path.join(dataDir, 'job-preferences.md'), 'utf-8'),
         getGeoLocation(),
       ])
     );
@@ -132,13 +133,19 @@ export class Analyzer {
     ]);
   }
 
-  async reduceJobList(jobs: ListedJob[]): Promise<ListedJob[]> {
+  async reduceJobList(
+    jobs: ListedJob[]
+  ): Promise<[jobs: ListedJob[], errors: Error[]]> {
+    const errors: Error[] = [];
     this.checkInit();
 
-    const generateJobId = (job: ListedJobSansUrl) =>
+    // 'id' in this context is a unique identifier based on
+    // the fields included to the model, so we can rebuild
+    // the full `ListedJob` after truncating it for the model
+    const generateJobId = (job: ListedJobSansId) =>
       (job.title + job.location).replace(/ /g, '');
 
-    const jobsWithoutUrls: Omit<ListedJob, 'url'>[] = [];
+    const jobsWithoutUrls: ListedJobSansId[] = [];
     const jobsById = new Map<string, ListedJob>();
     for (const job of jobs) {
       const { title, location } = job;
@@ -153,16 +160,16 @@ export class Analyzer {
       { role: 'user', content: JSON.stringify(jobsWithoutUrls) },
     ])) as any;
 
-    function normalizeJobListResponse(res: any): ListedJobSansUrl[] {
+    function normalizeJobListResponse(res: any): ListedJobSansId[] {
       if (typeof res === 'object') {
         if (Array.isArray(res)) {
-          return res as ListedJobSansUrl[];
+          return res as ListedJobSansId[];
         } else {
           const keys = Object.keys(res);
           // this means it just put the array in a top-level object
           // (despite being asked not to...)
           if (keys.length === 1 && Array.isArray(res[keys[0]])) {
-            return res[keys[0]] as ListedJobSansUrl[];
+            return res[keys[0]] as ListedJobSansId[];
           }
         }
       }
@@ -171,7 +178,7 @@ export class Analyzer {
     }
 
     const filteredJobList = normalizeJobListResponse(response);
-    // re-add urls into jobs
+    // re-add ids into jobs
     const result: ListedJob[] = [];
     for (const job of filteredJobList) {
       const id = generateJobId(job);
@@ -179,13 +186,14 @@ export class Analyzer {
         const error = new Error(`Job in filtered list not found in original`);
         // @ts-expect-error
         error.job = job;
-        throw error;
+        errors.push(error);
+        continue;
       }
 
       result.push(jobsById.get(id)!);
     }
 
-    return result;
+    return [result, errors];
   }
 
   private generateUserInfoPrompt(
