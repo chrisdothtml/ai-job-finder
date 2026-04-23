@@ -24,6 +24,10 @@ async function main() {
   errors.push(..._errors);
   spinner.succeed(`Reduced list to ${filteredJobs.length} potential matches`);
 
+  for (const error of errors) {
+    console.error(error);
+  }
+
   spinner = new Spinner('Fetching details for jobs...', {
     clearAfter: true,
   }).start();

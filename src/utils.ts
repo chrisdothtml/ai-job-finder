@@ -1,4 +1,8 @@
+import { randomUUID } from 'crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import process from 'node:process';
+import { dataDir } from './constants.ts';
 import { cachedFetch } from './fetch.ts';
 
 export function getEnv(key: string, fallback?: string): string | null {
@@ -41,7 +45,7 @@ export interface OllamaMessage {
   content: string;
 }
 
-export interface OllamaOptions {
+export interface OllamaParams {
   // Sampling
   temperature?: number; // randomness (0 = deterministic)
   top_k?: number; // limit vocab to top K tokens
@@ -83,27 +87,38 @@ export interface OllamaOptions {
   grammar?: string; // BNF grammar constraint
 }
 
+export interface OllamaOptions {
+  format?: 'boolean' | 'json';
+  stream?: boolean;
+  params?: OllamaParams;
+}
+
 // built-in recommended settings for models
-export const modelPresets: { [model: string]: OllamaOptions } = {
-  'gemma4:e4b': { temperature: 1.0, top_p: 0.95, top_k: 64 },
+export const modelPresets: { [model: string]: OllamaParams } = {
+  'gemma4:e4b': { temperature: 0.1, top_p: 0.95, top_k: 64, num_ctx: 2e4 },
+  'gpt-oss:20b': { temperature: 0.1, num_ctx: 2e4 },
 } as const;
 
-export async function ollamaChat<T>(
+const CONVOS_DIR = path.join(dataDir, '.convos');
+await fs.mkdir(CONVOS_DIR, { recursive: true });
+export async function ollamaChat(
   model: string,
   messages: OllamaMessage[],
-  opts: OllamaOptions = {}
-): Promise<T> {
+  options: OllamaOptions = {}
+): Promise<[response: any, convoId: string]> {
+  const convoId = Date.now() + '-' + randomUUID().split('-')[0];
   const host = getEnv('OLLAMA_HOST', 'http://localhost:11434');
-  const presetOpts = modelPresets[model] ?? {};
+  const { params, ...opts } = options;
+  const presetParams = modelPresets[model] ?? {};
   const response = await fetch(`${host}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      stream: false,
+      ...opts,
       model,
       messages,
-      stream: false,
-      format: 'json',
-      options: { ...presetOpts, ...opts },
+      options: { ...presetParams, ...params },
     }),
   });
 
@@ -114,12 +129,32 @@ export async function ollamaChat<T>(
   }
 
   const data = (await response.json()) as { message: { content: string } };
-  try {
-  return JSON.parse(data.message.content.replace(/^```json|```$/g, '')) as T;
-  } catch (error) {
-    // @ts-expect-error
-    error.chatMessage = data.message;
-    throw error;
+
+  await fs.writeFile(
+    path.join(CONVOS_DIR, `${convoId}.json`),
+    JSON.stringify({ convoId, messages, response: data }, null, 2)
+  );
+
+  const message = data.message.content;
+  if (opts.format === 'json') {
+    try {
+      return [JSON.parse(message.replace(/^```json|```$/g, '')), convoId];
+    } catch (error) {
+      // @ts-expect-error
+      error.convoId = convoId;
+      throw error;
+    }
+  } else if (opts.format === 'boolean') {
+    if (message === 'true' || message === 'false') {
+      return [message === 'true', convoId];
+    } else {
+      const error = new Error(`Model didn't respond with a boolean`);
+      // @ts-expect-error
+      error.convoId = convoId;
+      throw error;
+    }
+  } else {
+    return [message, convoId];
   }
 }
 
