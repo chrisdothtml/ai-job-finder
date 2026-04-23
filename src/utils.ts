@@ -1,4 +1,5 @@
 import process from 'node:process';
+import { cachedFetch } from './fetch.ts';
 
 export function getEnv(key: string, fallback?: string): string | null {
   if (process.env.hasOwnProperty(key)) {
@@ -26,7 +27,7 @@ export interface GeoLocation {
 }
 
 export async function getGeoLocation(): Promise<GeoLocation> {
-  const response = await fetch('http://ip-api.com/json');
+  const response = await cachedFetch('http://ip-api.com/json');
   if (!response.ok) {
     throw new Error(
       `GeoLocation request failed: ${response.status} ${response.statusText}`

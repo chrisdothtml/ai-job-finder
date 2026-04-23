@@ -1,3 +1,4 @@
+import { cachedFetch } from '../fetch.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 export interface GreenhouseListedJob {
@@ -21,7 +22,7 @@ export class GreenhouseScraper extends Scraper {
   }
 
   async getJobsList(): Promise<ListedJob[]> {
-    const res = (await fetch(this.baseUrl).then((res) =>
+    const res = (await cachedFetch(this.baseUrl).then((res) =>
       res.json()
     )) as GreenhouseJobList;
 
@@ -49,7 +50,9 @@ export class GreenhouseScraper extends Scraper {
   }
 
   async getJobContent(id: string): Promise<string> {
-    const res = await fetch(`${this.baseUrl}/${id}`).then((res) => res.json());
+    const res = await cachedFetch(`${this.baseUrl}/${id}`).then((res) =>
+      res.json()
+    );
     return JSON.stringify(res);
   }
 }
