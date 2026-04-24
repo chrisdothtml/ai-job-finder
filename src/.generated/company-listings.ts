@@ -12,6 +12,7 @@ interface TechCompany {
 
 export const companies: TechCompany[] = [
   { name: 'Airbnb', slug: 'airbnb', Scraper: GreenhouseScraper },
+  { name: 'Anthropic', slug: 'anthropic', Scraper: GreenhouseScraper },
   { name: 'AppLovin', slug: 'applovin', Scraper: GreenhouseScraper },
   { name: 'Astera Labs', slug: 'asteralabs', Scraper: GreenhouseScraper },
   { name: 'Block', slug: 'block', Scraper: GreenhouseScraper },
