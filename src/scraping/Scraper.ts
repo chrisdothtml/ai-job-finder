@@ -34,3 +34,5 @@ export abstract class Scraper {
    */
   abstract test(): Promise<void>;
 }
+
+export type ScraperSubclass = new (...args: any[]) => Scraper;

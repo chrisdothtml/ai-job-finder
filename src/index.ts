@@ -1,6 +1,5 @@
 import { companies } from './.generated/company-listings.ts';
 import { Analyzer, type JobFitResponse } from './Analyzer.ts';
-import { GreenhouseScraper } from './scraping/GreenhouseScraper.ts';
 import { type ListedJob } from './scraping/Scraper.ts';
 import { Spinner } from './utils.ts';
 
@@ -11,8 +10,8 @@ async function main() {
   const analyzer = new Analyzer();
   await analyzer.init();
 
-  const company = companies.find((c) => c.name === 'Cloudflare');
-  const scraper = new GreenhouseScraper(company!.slug);
+  const company = companies.find((c) => c.name === 'Cloudflare')!;
+  const scraper = new company.Scraper(company.slug);
 
   let spinner = new Spinner('Fetching job listings...').start();
   const jobs = await scraper.getJobsList();
