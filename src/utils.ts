@@ -95,12 +95,13 @@ export interface OllamaOptions {
 
 // built-in recommended settings for models
 export const modelPresets: { [model: string]: OllamaParams } = {
-  'gemma4:e4b': { temperature: 0.1, top_p: 0.95, top_k: 64, num_ctx: 2e4 },
-  'gpt-oss:20b': { temperature: 0.1, num_ctx: 2e4 },
+  base: { temperature: 0.1, num_ctx: 2e4 },
+  'gemma4:e4b': { top_p: 0.95, top_k: 64 },
 } as const;
 
 const CONVOS_DIR = path.join(dataDir, '.convos');
 await fs.mkdir(CONVOS_DIR, { recursive: true });
+
 export async function ollamaChat(
   model: string,
   messages: OllamaMessage[],
@@ -118,7 +119,7 @@ export async function ollamaChat(
       ...opts,
       model,
       messages,
-      options: { ...presetParams, ...params },
+      options: { ...modelPresets.base, ...presetParams, ...params },
     }),
   });
 
