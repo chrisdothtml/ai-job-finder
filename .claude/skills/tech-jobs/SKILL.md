@@ -7,7 +7,8 @@ You can fetch `https://companiesmarketcap.com/tech/largest-tech-companies-by-mar
 
 From there, you need to figure out if they have jobs posted on commonly-used job posting sites (please do this in a single python script to avoid the user needing to confirm many commands):
 
-- Lever: run a HEAD request to `https://jobs.lever.co/{COMPANY_NAME}` (to keep requests lightweight) to determine whether the company has jobs listed on lever
-- Greenhouse: fetch `https://boards-api.greenhouse.io/v1/boards/{COMPANY_NAME}` to determine whether the company has jobs listed on Greenhouse
+1. Greenhouse: fetch `https://boards-api.greenhouse.io/v1/boards/{COMPANY_NAME}` to determine whether the company has jobs listed on Greenhouse
+2. Lever: run a HEAD request to `https://jobs.lever.co/{COMPANY_NAME}` (to keep requests lightweight) to determine whether the company has jobs listed on lever
+3. Ashby: run a HEAD request to `https://jobs.ashbyhq.com/{COMPANY_NAME}` (to keep requests lightweight) to determine whether the company has jobs listed on ashby
 
 Then write any companies you found, along with their jobs board type to `src/.generated/company-listings.ts`. Do NOT modify the Typescript types in this file.

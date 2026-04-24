@@ -1,3 +1,4 @@
+import { AshbyScraper } from '../scraping/AshbyScraper.ts';
 import { GreenhouseScraper } from '../scraping/GreenhouseScraper.ts';
 import { LeverScraper } from '../scraping/LeverScraper.ts';
 import { type ScraperSubclass } from '../scraping/Scraper.ts';
@@ -25,6 +26,7 @@ export const companies: TechCompany[] = [
   { name: 'Robinhood', slug: 'robinhood', Scraper: GreenhouseScraper },
   { name: 'Roku', slug: 'roku', Scraper: GreenhouseScraper },
   { name: 'Samsara', slug: 'samsara', Scraper: GreenhouseScraper },
+  { name: 'Snowflake', slug: 'snowflake', Scraper: AshbyScraper },
   { name: 'SoFi', slug: 'sofi', Scraper: GreenhouseScraper },
   { name: 'Spotify', slug: 'spotify', Scraper: LeverScraper },
   { name: 'Twilio', slug: 'twilio', Scraper: GreenhouseScraper },
