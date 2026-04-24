@@ -21,6 +21,7 @@ export const companies: TechCompany[] = [
   { name: 'Datadog', slug: 'datadog', Scraper: GreenhouseScraper },
   { name: 'IonQ', slug: 'ionq', Scraper: GreenhouseScraper },
   { name: 'MongoDB', slug: 'mongodb', Scraper: GreenhouseScraper },
+  { name: 'NetEase', slug: 'netease', Scraper: AshbyScraper },
   { name: 'Pure Storage', slug: 'purestorage', Scraper: GreenhouseScraper },
   { name: 'Reddit', slug: 'reddit', Scraper: GreenhouseScraper },
   { name: 'Robinhood', slug: 'robinhood', Scraper: GreenhouseScraper },
