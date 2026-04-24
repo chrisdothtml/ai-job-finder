@@ -1,57 +1,95 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { companies } from './.generated/company-listings.ts';
 import { Analyzer, type JobFitResponse } from './Analyzer.ts';
+import { dataDir, repoRootDir } from './constants.ts';
 import { type ListedJob } from './scraping/Scraper.ts';
 import { Spinner } from './utils.ts';
 
-async function main() {
-  const errors: Error[] = [];
-  let _errors: Error[];
+type AnalyzedJob = ListedJob &
+  JobFitResponse & {
+    companyName: string;
+  };
 
+async function main() {
   const analyzer = new Analyzer();
   await analyzer.init();
 
-  const company = companies.find((c) => c.name === 'Cloudflare')!;
-  const scraper = new company.Scraper(company.slug);
+  console.log(`Analyzing jobs from ${companies.length} companies`);
 
-  let spinner = new Spinner('Fetching job listings...').start();
-  const jobs = await scraper.getJobsList();
-  spinner.succeed(`Fetched ${jobs.length} jobs`);
+  const analyzedJobs: AnalyzedJob[] = [];
+  const errors: Error[] = [];
+  let _errors: Error[];
+  for (const company of companies) {
+    const logTag = `[${company.name}] `;
+    using scraper = new company.Scraper(company.slug);
 
-  spinner = new Spinner('Reducing jobs based on user info...').start();
-  let filteredJobs: ListedJob[];
-  [filteredJobs, _errors] = await analyzer.reduceJobList(jobs);
-  errors.push(..._errors);
-  spinner.succeed(`Reduced list to ${filteredJobs.length} potential matches`);
+    let spinner = new Spinner(logTag + `Fetching job listings...`).start();
+    const jobs = await scraper.getJobsList();
+    spinner.succeed(logTag + `Fetched ${jobs.length} jobs`);
 
-  for (const error of errors) {
-    console.error(error);
+    spinner = new Spinner(
+      logTag + `Reducing jobs based on user info...`
+    ).start();
+    let filteredJobs: ListedJob[];
+    [filteredJobs, _errors] = await analyzer.reduceJobList(jobs);
+    errors.push(..._errors);
+    spinner.succeed(
+      logTag + `Reduced list to ${filteredJobs.length} potential matches`
+    );
+
+    spinner = new Spinner(logTag + `Fetching details for jobs...`, {
+      clearAfter: true,
+    }).start();
+    const jobsList = await Promise.all(
+      filteredJobs.map(async (job) => ({
+        ...job,
+        content: await scraper.getJobContent(job.id),
+      }))
+    );
+    const jobsListLen = jobsList.length;
+    spinner.succeed();
+
+    spinner = new Spinner('').start();
+    for (let i = 0; i < jobsListLen; i++) {
+      spinner.text =
+        logTag + `Generating fitness info for jobs ${i + 1}/${jobsListLen}`;
+
+      const job = jobsList[i];
+      const analysis = await analyzer.analyzeJob(job.content);
+      // @ts-expect-error
+      delete job.content;
+      analyzedJobs.push({ ...job, ...analysis, companyName: company.name });
+    }
+    spinner.succeed(logTag + `Analyzed ${jobsListLen} jobs`);
   }
-
-  spinner = new Spinner('Fetching details for jobs...', {
-    clearAfter: true,
-  }).start();
-  const jobsList = await Promise.all(
-    filteredJobs.slice(0, 5).map(async (job) => scraper.getJobContent(job.id))
-  );
-  const jobsListLen = jobsList.length;
-  spinner.succeed();
-
-  spinner = new Spinner('').start();
-  const analysis: (JobFitResponse & { url: string })[] = [];
-  for (let i = 0; i < jobsListLen; i++) {
-    spinner.text = `Generating fitness info for jobs ${i + 1}/${jobsListLen}`;
-    const result = await analyzer.analyzeJob(jobsList[i]);
-    const job = JSON.parse(jobsList[i]);
-    analysis.push({ ...result, url: job.absolute_url });
-  }
-  spinner.succeed(`Analyzed ${jobsListLen} jobs`);
 
   for (const error of errors) {
     console.error(error);
   }
   console.log('');
 
-  console.log(JSON.stringify(analysis, null, 2));
+  const outputFilePath = path.join(dataDir, 'analysis.json');
+  const relOutputFilePath = path.relative(repoRootDir, outputFilePath);
+  const finalJobsList = analyzedJobs
+    .filter((j) => j.fitScore > 0.6)
+    .sort((a, b) => {
+      // 1. sort by fitness score
+      const scoreDiff = b.fitScore - a.fitScore;
+      if (scoreDiff !== 0) return scoreDiff;
+
+      // 2. sort by company name
+      const companyDiff = a.companyName.localeCompare(b.companyName);
+      if (companyDiff !== 0) return companyDiff;
+
+      // 3. sort by id
+      return a.id.localeCompare(b.id);
+    });
+
+  await fs.writeFile(outputFilePath, JSON.stringify(finalJobsList, null, 2));
+  console.log(
+    `Dumped ${finalJobsList.length} potential jobs into ./${relOutputFilePath}`
+  );
 }
 
 await main();
