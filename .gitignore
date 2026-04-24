@@ -1,5 +1,6 @@
 .DS_Store
 .env
+.playwright-mcp
 .remember
 .yarn
 node_modules

@@ -1,9 +1,11 @@
 {
+  "enabledMcpjsonServers": ["playwright"],
   "permissions": {
     "allow": [
       "WebFetch(domain:companiesmarketcap.com)",
       "Bash(python3 *)",
-      "Bash(yarn typecheck *)"
+      "Bash(yarn typecheck *)",
+      "mcp__playwright__*"
     ]
   }
 }
