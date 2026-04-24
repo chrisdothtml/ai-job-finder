@@ -42,24 +42,34 @@ async function main() {
       clearAfter: true,
     }).start();
     const jobsList = await Promise.all(
-      filteredJobs.map(async (job) => ({
-        ...job,
-        content: await scraper.getJobContent(job.id),
-      }))
-    );
-    const jobsListLen = jobsList.length;
+      filteredJobs.map(async (job) => {
+        try {
+          const content = await scraper.getJobContent(job.id);
+          return { ...job, content };
+        } catch (error) {
+          errors.push(error as Error);
+          return null;
+        }
+      })
+    ).then((l) => l.filter((j) => j !== null));
     spinner.succeed();
 
     spinner = new Spinner('').start();
+    const jobsListLen = jobsList.length;
     for (let i = 0; i < jobsListLen; i++) {
       spinner.text =
         logTag + `Generating fitness info for jobs ${i + 1}/${jobsListLen}`;
 
       const job = jobsList[i];
-      const analysis = await analyzer.analyzeJob(job.content);
-      // @ts-expect-error
-      delete job.content;
-      analyzedJobs.push({ ...job, ...analysis, companyName: company.name });
+      try {
+        const analysis = await analyzer.analyzeJob(job.content);
+        // @ts-expect-error
+        delete job.content;
+        analyzedJobs.push({ ...job, ...analysis, companyName: company.name });
+      } catch (error) {
+        errors.push(error as Error);
+        continue;
+      }
     }
     spinner.succeed(logTag + `Analyzed ${jobsListLen} jobs`);
   }
