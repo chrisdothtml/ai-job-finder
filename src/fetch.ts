@@ -22,6 +22,7 @@ interface CacheContext {
 }
 
 type Fetch = typeof fetch;
+// FIXME: implement rate limit header/status-code detection
 export async function cachedFetch(
   this: CacheContext | void,
   ...args: Parameters<Fetch>

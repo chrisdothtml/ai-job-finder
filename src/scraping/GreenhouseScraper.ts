@@ -1,4 +1,6 @@
+import assert from 'node:assert';
 import { cachedFetch } from '../fetch.ts';
+import { time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 export interface GreenhouseListedJob {
@@ -12,7 +14,6 @@ export interface GreenhouseJobList {
   jobs: GreenhouseListedJob[];
 }
 
-// FIXME: implement rate limit header/status-code detection
 export class GreenhouseScraper extends Scraper {
   private baseUrl: string;
 
@@ -21,10 +22,10 @@ export class GreenhouseScraper extends Scraper {
     this.baseUrl = `https://boards-api.greenhouse.io/v1/boards/${this.companySlug}/jobs`;
   }
 
-  async getJobsList(): Promise<ListedJob[]> {
-    const res = (await cachedFetch(this.baseUrl).then((res) =>
-      res.json()
-    )) as GreenhouseJobList;
+  async getJobsList(testing = false): Promise<ListedJob[]> {
+    const res = (await cachedFetch
+      .call({ cache: !testing, cacheTTL: time.day }, this.baseUrl)
+      .then((res) => res.json())) as GreenhouseJobList;
 
     return res.jobs.map((job) => {
       let location = job.location.name;
@@ -54,5 +55,23 @@ export class GreenhouseScraper extends Scraper {
       res.json()
     );
     return JSON.stringify(res);
+  }
+
+  async test() {
+    const jobs = await this.getJobsList(true);
+
+    if (jobs.length > 0) {
+      const firstJob = jobs[0];
+      for (const [key, val] of Object.entries(firstJob)) {
+        assert.ok(
+          typeof val === 'string' && val.length > 0,
+          `fetched job has '${key}' prop`
+        );
+      }
+
+      const job = await this.getJobContent(firstJob.id);
+      assert.ok(typeof job === 'string');
+      assert.ok(job.length > 0);
+    }
   }
 }

@@ -5,6 +5,15 @@ import process from 'node:process';
 import { dataDir } from './constants.ts';
 import { cachedFetch } from './fetch.ts';
 
+/** Readable time durations in milliseconds */
+export const time = (() => {
+  const second = 1e3;
+  const minute = 60 * second;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  return { second, minute, hour, day } as const;
+})();
+
 export function getEnv(key: string, fallback?: string): string | null {
   if (process.env.hasOwnProperty(key)) {
     return process.env[key] as string;
