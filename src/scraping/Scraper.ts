@@ -2,6 +2,7 @@ export interface ListedJob {
   title: string;
   location: string;
   id: string;
+  url: string;
 }
 
 export abstract class Scraper {

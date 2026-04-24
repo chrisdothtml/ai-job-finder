@@ -8,6 +8,7 @@ const DOMAIN = 'netflix.com';
 const PAGE_SIZE = 100;
 
 interface NetflixPosition {
+  canonicalPositionUrl: string;
   id: number;
   name: string;
   location: string;
@@ -44,6 +45,7 @@ export class NetflixScraper extends Scraper {
       for (const pos of data.positions) {
         jobs.push({
           id: String(pos.id),
+          url: pos.canonicalPositionUrl,
           title: pos.name,
           location: pos.locations.join(', ') || pos.location,
         });

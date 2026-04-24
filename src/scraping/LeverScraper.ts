@@ -12,6 +12,7 @@ interface LeverJob {
   };
   descriptionPlain: string;
   descriptionBodyPlain: string;
+  hostedUrl: string;
   lists: { text: string; content: string }[];
   additionalPlain: string;
 }
@@ -40,6 +41,7 @@ export class LeverScraper extends Scraper {
 
     return jobs.map((job) => ({
       id: job.id,
+      url: job.hostedUrl,
       title: job.text,
       location:
         job.categories.allLocations?.join(', ') ??

@@ -4,6 +4,7 @@ import { time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 export interface GreenhouseListedJob {
+  absolute_url: string;
   id: number;
   title: string;
   location: { name: string };
@@ -44,6 +45,7 @@ export class GreenhouseScraper extends Scraper {
 
       return {
         id: job.id.toString(),
+        url: job.absolute_url,
         title: job.title,
         location,
       };

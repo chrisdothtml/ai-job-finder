@@ -67,6 +67,7 @@ export class AshbyScraper extends Scraper {
       }
       return {
         id: posting.id,
+        url: posting.jobUrl,
         title: posting.title,
         location: locations.join(', '),
       };
