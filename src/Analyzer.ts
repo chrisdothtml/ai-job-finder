@@ -1,8 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { dataDir } from './constants.ts';
-import { ListedJobStr, type ListedJob } from './scraping/Scraper.ts';
-import { inlineInterface } from './types.ts';
+import { type ListedJob } from './scraping/Scraper.ts';
 import {
   dedent,
   getGeoLocation,
@@ -15,99 +14,100 @@ export interface JobFitResponse {
   pros: string;
   cons: string;
 }
-export const JobFitResponseStr = inlineInterface(`
-interface JobFitResponse {
-  fitScore: number;
-  pros: string;
-  cons: string;
-}
-`);
-
-type ListedJobSansId = Omit<ListedJob, 'id'>;
 
 export class Analyzer {
-  static jobAnalyzePrompt = dedent(`
-    # Purpose
-    Your job is to determine whether a given job posting is a good fit for the user, based on their location, resume, and job preferences listed below.
+  static prompts = {
+    analyzeJob: dedent(`
+      # Purpose
+      Your job is to determine whether a given job posting is a good fit for the user, based on their location, resume, and job preferences listed below.
 
-    ## Output format
-    You should output using JSON format, using ONLY this schema:
-    \`\`\`typescript
-    ${JobFitResponseStr}
-    \`\`\`
+      ## Output format
+      You should output using JSON format, using ONLY this schema:
+      \`\`\`typescript
+      interface JobFitResponse {
+        // number between 0-1; e.g. 0, 0.1, ..., 0.9, 1.0
+        fitScore: number;
+        pros: string;
+        cons: string;
+      }
+      \`\`\`
 
-    Reasoning should be kept very brief and not overly wordy; the user will be viewing your assessment in a list of many analyzed jobs, so they should be able to quickly breeze past your reasoning for each job; keep it short and to-the-point. Here are some example responses:
+      Reasoning should be kept very brief and not overly wordy; the user will be viewing your assessment in a list of many analyzed jobs, so they should be able to quickly breeze past your reasoning for each job; keep it short and to-the-point. Here are some example responses:
 
-    \`\`\`json
-    { "fitScore": 1, "pros": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company", "cons": "" }
-    \`\`\`
+      \`\`\`json
+      { "fitScore": 1, "pros": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company", "cons": "" }
+      \`\`\`
 
-    \`\`\`json
-    { "fitScore": 0.25, "pros": "Job is a good match for the user's experience", "cons": "Job is fully on-site, which the user has explicitly stated they aren't interested in" }
-    \`\`\`
+      \`\`\`json
+      { "fitScore": 0.25, "pros": "Job is a good match for the user's experience", "cons": "Job is fully on-site, which the user has explicitly stated they aren't interested in" }
+      \`\`\`
 
-    \`\`\`json
-    { "fitScore": 0, "pros": "", "cons": "Job is based outside of the user's country" }
-    \`\`\`
+      \`\`\`json
+      { "fitScore": 0, "pros": "", "cons": "Job is based outside of the user's country" }
+      \`\`\`
 
-    ## Responsibility
-    The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that. **IMPORTANT** Also note that if the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states that they're open to travel or move for a job, ASSUME THEY ARE NOT OPEN TO THAT.
-  `);
-  static summarizeResumePrompt = dedent(`
-    # Purpose
-    Your job is to analyze the user's provided resume and reduce their work experience down to a two-sentence-max summary of their work experience. This doesn't need to be all-encompassing, but should capture the diversity of their past experience.
+      ## Responsibility
+      The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that. **IMPORTANT** Also note that if the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states that they're open to travel or move for a job, ASSUME THEY ARE NOT OPEN TO THAT.
+    `),
+    reduceJobs: dedent(`
+      # Purpose
+      You are being used to reduce a list of job postings down to those that the user may actually be a good fit for, in terms of role match (based on preferences and past experience) and location preferences/restrictions.
 
-    The context is that your summary will be used as a first-pass to reduce a list of available job titles to those that match the user's past experience. You can take their preferences into account to put emphasis on past experience relevant to their job search.
-  `);
-  static reduceJobListPrompt = dedent(`
-    # Purpose
-    You are being used to reduce a list of job postings down to those that the user may actually be a good fit for, in terms of role match (based on preferences and past experience) and location preferences/restrictions.
+      ## Job listing format
+      A job listing follows this schema:
+      \`\`\`typescript
+      interface ListedJob {
+        title: string;
+        location: string;
+      }
+      \`\`\`
 
-    ## Job listing format
-    A job listing follows this schema:
-    \`\`\`typescript
-    ${ListedJobStr}
-    \`\`\`
+      ## Types of jobs
+      1. Remote: This means the employee works full-time from home instead of commuting to an office. The employee typically still is required to be in the same country as the role being offered.
+      2. Hybrid: This means that the job is partially remote, but still requires the employee to commute to the office for some number of days of the week. These jobs would require the employee to be located in both the same country and state as the role being offered, and likely the same area of the state as well (unless the user is willing to move for a role).
+      3. In-office: This means the employee commutes to an office full-time, every day of the week. Same location restrictions as Hybrid. A role may not use the exact words "In-office"; assume if the role doesn't mention either "remote" or "hybrid", that it's an in-office role.
 
-    ## Types of jobs
-    1. Remote: This means the employee works full-time from home instead of commuting to an office. The employee typically still is required to be in the same country as the role being offered.
-    2. Hybrid: This means that the job is partially remote, but still requires the employee to commute to the office for some number of days of the week. These jobs would require the employee to be located in both the same country and state as the role being offered, and likely the same area of the state as well (unless the user is willing to move for a role).
-    3. In-office: This means the employee commutes to an office full-time, every day of the week. Same location restrictions as Hybrid. A role may not use the exact words "In-office"; assume if the role doesn't mention either "remote" or "hybrid", that it's an in-office role.
+      ## Output format
+      Respond with ONLY one token: true or false. Do not include punctuation, explanation, or whitespace.
 
-    ## Output format
-    Respond with ONLY one token: true or false. Do not include punctuation, explanation, or whitespace.
+      ### Examples
 
-    ### Examples
+      #### User is a senior software engineer, located in San Francisco, California, looking for remote IC (individual contributor) roles
+      **Input**: \`{"title":"Legal Operations Specialist - Remote","location":"San Francisco, California"}\`
+      **Output**: \`false\`
+      **Reasoning**: While the job is a good fit in terms of location, it's a legal role, not software engineering
 
-    #### User is a senior software engineer, located in San Francisco, California, looking for remote IC (individual contributor) roles
-    **Input**: \`{"title":"Legal Operations Specialist - Remote","location":"San Francisco, California"}\`
-    **Output**: \`false\`
-    **Reasoning**: While the job is a good fit in terms of location, it's a legal role, not software engineering
+      **Input**: \`{"title":"Sr Software Engineer","location":"In-office - San Francisco, California"}\`
+      **Output**: \`false\`
+      **Reasoning**: While the job is a good fit in terms of location and role, the user is strictly looking for remote roles
 
-    **Input**: \`{"title":"Sr Software Engineer","location":"In-office - San Francisco, California"}\`
-    **Output**: \`false\`
-    **Reasoning**: While the job is a good fit in terms of location and role, the user is strictly looking for remote roles
+      **Input**: \`{"title":"Sr Software Engineer - Remote","location":"SF Bay Area"}\`
+      **Output**: \`true\`
+      **Reasoning**: This job is a good fit for the user all around
 
-    **Input**: \`{"title":"Sr Software Engineer - Remote","location":"SF Bay Area"}\`
-    **Output**: \`true\`
-    **Reasoning**: This job is a good fit for the user all around
+      **Input**: \`{"title":"Sr Software Engineer - Remote","location":"Austin, TX"}\`
+      **Output**: \`true\`
+      **Reasoning**: This job is a good fit for the user. The location is stated as "Austin, TX", but it's fully remote, so the user still fits
 
-    **Input**: \`{"title":"Sr Software Engineer - Remote","location":"Austin, TX"}\`
-    **Output**: \`true\`
-    **Reasoning**: This job is a good fit for the user. The location is stated as "Austin, TX", but it's fully remote, so the user still fits
+      **Input**: \`{"title":"Sr Software Engineer","location":"Remote - London, UK"}\`
+      **Output**: \`false\`
+      **Reasoning**: This job is a good fit for the user in terms of role, but it's located in "London, UK", which is a different country than the user
 
-    **Input**: \`{"title":"Sr Software Engineer","location":"Remote - London, UK"}\`
-    **Output**: \`false\`
-    **Reasoning**: This job is a good fit for the user in terms of role, but it's located in "London, UK", which is a different country than the user
+      **Input**: \`{"title":"Sr Software Engineer","location":"Austin, TX"}\`
+      **Output**: \`true\`
+      **Reasoning**: This job is a good fit for the user in terms of role, but the location is stated as "Austin, TX", and there is no mention of it being a remote role
 
-    **Input**: \`{"title":"Sr Software Engineer","location":"Austin, TX"}\`
-    **Output**: \`true\`
-    **Reasoning**: This job is a good fit for the user in terms of role, but the location is stated as "Austin, TX", and there is no mention of it being a remote role
+      **Input**: \`{"title":"Software Engineering Intern","location":"Remote - US"}\`
+      **Output**: \`false\`
+      **Reasoning**: This job is a good fit for the user in terms of location, but they are a senior engineer, and this job is for an intern
+    `),
+    summarizeResume: dedent(`
+      # Purpose
+      Your job is to analyze the user's provided resume and reduce their work experience down to a two-sentence-max summary of their work experience. This doesn't need to be all-encompassing, but should capture the diversity of their past experience.
 
-    **Input**: \`{"title":"Software Engineering Intern","location":"Remote - US"}\`
-    **Output**: \`false\`
-    **Reasoning**: This job is a good fit for the user in terms of location, but they are a senior engineer, and this job is for an intern
-  `);
+      The context is that your summary will be used as a first-pass to reduce a list of available job titles to those that match the user's past experience. You can take their preferences into account to put emphasis on past experience relevant to their job search.
+    `),
+  };
 
   // TODO: somehow make this configurable and not necessarily ollama (e.g. chatgpt, claude)
   private model = 'gemma4:e4b';
@@ -133,7 +133,7 @@ export class Analyzer {
     this.checkInit();
 
     const sysPrompt = [
-      Analyzer.jobAnalyzePrompt,
+      Analyzer.prompts.analyzeJob,
       this.userInfoPrompt,
       this.userResumePrompt,
     ].join('\n\n');
@@ -154,7 +154,7 @@ export class Analyzer {
     this.checkInit();
 
     const sysPrompt = [
-      Analyzer.reduceJobListPrompt,
+      Analyzer.prompts.reduceJobs,
       this.userInfoPrompt,
       `## User work experience summary\n\n` +
         (await this.generateResumeSummary()),
@@ -197,7 +197,7 @@ export class Analyzer {
 
   private async generateResumeSummary(): Promise<string> {
     const sysPrompt = [
-      Analyzer.summarizeResumePrompt,
+      Analyzer.prompts.summarizeResume,
       this.userInfoPrompt,
     ].join('\n\n');
     const [response] = await ollamaChat(this.model, [
