@@ -12,6 +12,8 @@ type AnalyzedJob = ListedJob &
   };
 
 async function main() {
+  const rawOutputFilePath = path.join(dataDir, 'analysis-raw.json');
+
   const analyzer = new Analyzer();
   await analyzer.init();
 
@@ -66,6 +68,10 @@ async function main() {
         // @ts-expect-error
         delete job.content;
         analyzedJobs.push({ ...job, ...analysis, companyName: company.name });
+        await fs.writeFile(
+          rawOutputFilePath,
+          JSON.stringify(analyzedJobs, null, 2)
+        );
       } catch (error) {
         errors.push(error as Error);
         continue;
