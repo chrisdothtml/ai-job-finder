@@ -2,8 +2,20 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "files.exclude": {
+    ".playwright-mcp/": true,
+    ".remember/": true,
     ".yarn/": true,
-    "node_modules/": true
+    "node_modules/": true,
+    // files that likely won't be touched ever and just pollute files list
+    ".envrc": true,
+    ".prettierignore": true,
+    ".prettierrc.cjs": true,
+    ".shellcheckrc": true,
+    ".yarnrc.yml": true,
+    "knip.json": true,
+    "LICENSE": true,
+    "tsconfig.tsbuildinfo": true,
+    "yarn.lock": true
   },
   // make sure TS auto-imports have the file extension (required for node)
   "typescript.preferences.importModuleSpecifierEnding": "js",
