@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { cacheDir } from './constants.ts';
 import path from 'node:path';
+import { cacheDir } from './constants.ts';
 
 function serializeArgs(args: Parameters<Fetch>): string {
   const [url, init] = args;
@@ -16,10 +16,19 @@ function serializeArgs(args: Parameters<Fetch>): string {
   });
 }
 
+interface CacheContext {
+  cache?: boolean;
+  cacheTTL?: number;
+}
+
 type Fetch = typeof fetch;
 export async function cachedFetch(
+  this: CacheContext | void,
   ...args: Parameters<Fetch>
 ): ReturnType<Fetch> {
+  const { cache = true, cacheTTL } = this ?? {};
+  if (!cache) return fetch(...args);
+
   await fs.mkdir(cacheDir, { recursive: true });
 
   const key = crypto
@@ -29,6 +38,11 @@ export async function cachedFetch(
   const cacheFilePath = path.join(cacheDir, key + '.json');
 
   try {
+    if (cacheTTL !== undefined) {
+      const { mtimeMs } = await fs.stat(cacheFilePath);
+      if (Date.now() - mtimeMs > cacheTTL) throw new Error('expired');
+    }
+
     const cached = JSON.parse(await fs.readFile(cacheFilePath, 'utf8'));
 
     return new Response(Buffer.from(cached.body, 'base64'), {
