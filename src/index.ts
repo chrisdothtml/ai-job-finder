@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { companies } from './.generated/company-listings.ts';
 import { Analyzer, type JobFitResponse } from './Analyzer.ts';
-import { dataDir, repoRootDir } from './constants.ts';
+import { convosDir, dataDir, repoRootDir } from './constants.ts';
 import { type ListedJob } from './scraping/Scraper.ts';
 import { Spinner } from './utils.ts';
 
@@ -81,6 +81,17 @@ async function main() {
   }
 
   for (const error of errors) {
+    // @ts-expect-error
+    if (error.convoId) {
+      // @ts-expect-error
+      error.convoPath =
+        './' +
+        path.relative(
+          repoRootDir,
+          // @ts-expect-error
+          path.join(convosDir, `${error.convoId}.json`)
+        );
+    }
     console.error(error);
   }
   console.log('');

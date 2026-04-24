@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
-import { dataDir } from './constants.ts';
+import { convosDir } from './constants.ts';
 import { cachedFetch } from './fetch.ts';
 
 /** Readable time durations in milliseconds */
@@ -108,8 +108,7 @@ export const modelPresets: { [model: string]: OllamaParams } = {
   'gemma4:e4b': { top_p: 0.95, top_k: 64 },
 } as const;
 
-const CONVOS_DIR = path.join(dataDir, '.convos');
-await fs.mkdir(CONVOS_DIR, { recursive: true });
+await fs.mkdir(convosDir, { recursive: true });
 
 export async function ollamaChat(
   model: string,
@@ -141,7 +140,7 @@ export async function ollamaChat(
   const data = (await response.json()) as { message: { content: string } };
 
   await fs.writeFile(
-    path.join(CONVOS_DIR, `${convoId}.json`),
+    path.join(convosDir, `${convoId}.json`),
     JSON.stringify({ convoId, messages, response: data }, null, 2)
   );
 
