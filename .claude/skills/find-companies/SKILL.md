@@ -1,5 +1,5 @@
 ---
-name: tech-jobs
+name: find-companies
 description: Uses a public resource to retrieve a list of the current top tech companies, and detects whether they have listings on job boards with public APIs
 ---
 

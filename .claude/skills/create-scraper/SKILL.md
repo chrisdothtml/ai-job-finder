@@ -1,9 +1,9 @@
 ---
-name: scrape-careers
+name: create-scraper
 description: Given a careers page URL, uses Playwright browser tools to explore the page, identify reliable scraping patterns (preferring hidden JSON APIs over DOM scraping), then writes a TypeScript Scraper subclass for that company
 ---
 
-Your goal is to explore a company's careers page and write a permanent, reliable `Scraper` subclass that other code can use going forward. The argument is a careers page URL, e.g. `/scrape-careers https://explore.jobs.netflix.net/careers`.
+Your goal is to explore a company's careers page and write a permanent, reliable `Scraper` subclass that other code can use going forward. The argument is a careers page URL, e.g. `/create-scraper https://explore.jobs.netflix.net/careers`.
 
 ## Step 1 — Identify the company name
 
