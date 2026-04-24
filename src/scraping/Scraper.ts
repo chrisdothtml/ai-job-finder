@@ -16,6 +16,9 @@ interface ListedJob {
 
 export abstract class Scraper {
   constructor(protected companySlug: string) {}
+  // allow to be used via `using foo = new Scraper()`
+  [Symbol.dispose]() {}
+
   /**
    * Gets the full list of jobs
    */
