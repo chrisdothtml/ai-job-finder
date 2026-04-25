@@ -32,14 +32,14 @@ export class Analyzer {
       }
       \`\`\`
 
-      Reasoning should be kept very brief and not overly wordy; the user will be viewing your assessment in a list of many analyzed jobs, so they should be able to quickly breeze past your reasoning for each job; keep it short and to-the-point. Here are some example responses:
+      Reasoning should be kept very brief and not overly wordy; the user will be viewing your assessment in a list of many analyzed jobs, so they should be able to quickly breeze past your reasoning for each job; keep it short and to-the-point. Also, word your reasoning as if you're talking to the user; don't talk about them in the third person. Here are some example responses:
 
       \`\`\`json
-      { "fitScore": 1, "pros": "Job is remote, matches user's experience in infrastructure engineering, matches user's preference for a large company", "cons": "" }
+      { "fitScore": 1, "pros": "Job is remote, matches your experience in infrastructure engineering, matches your preference for a large company", "cons": "" }
       \`\`\`
 
       \`\`\`json
-      { "fitScore": 0.25, "pros": "Job is a good match for the user's experience", "cons": "Job is fully on-site, which the user has explicitly stated they aren't interested in" }
+      { "fitScore": 0.25, "pros": "Job is a good match for your experience", "cons": "Job is fully on-site, which you've explicitly stated you aren't interested in" }
       \`\`\`
 
       \`\`\`json
