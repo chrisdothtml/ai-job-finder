@@ -22,7 +22,7 @@ test('Ensure Scrapers work', async (t) => {
 
     t.test(`${Scraper.name} (${slug})`, async (t) => {
       using scraper = new Scraper(slug);
-      await scraper.test(t);
+      await scraper._test(t);
     });
   }
 });

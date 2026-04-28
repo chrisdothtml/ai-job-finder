@@ -1,5 +1,8 @@
 import builtinAssert from 'node:assert';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { type TestContext } from 'node:test';
+import { dataDir } from '../constants.ts';
 
 export abstract class Scraper {
   constructor(protected companySlug: string) {}
@@ -27,9 +30,22 @@ export abstract class Scraper {
     assert.ok(job.length > 0, 'Job content is not empty');
   }
 
-  async test(t?: TestContext) {
+  async _test(t?: TestContext) {
     // allow to be called manually or as part of a node test run
     return this.runTest((t ? t.assert : builtinAssert) as TestAssert);
+  }
+
+  /**
+   * Saves the jobs list and first job to json files in the data
+   * dir for debugging
+   */
+  async _dumpData() {
+    const jobsFilePath = path.join(dataDir, `${this.companySlug}-jobs.json`);
+    const jobFilePath = path.join(dataDir, `${this.companySlug}-job.json`);
+
+    const jobs = await this.getJobsList();
+    await fs.writeFile(jobsFilePath, JSON.stringify(jobs, null, 2));
+    await fs.writeFile(jobFilePath, await this.getJobContent(jobs[0].id));
   }
 }
 
