@@ -110,7 +110,7 @@ export class Analyzer {
   };
 
   // TODO: somehow make this configurable and not necessarily ollama (e.g. chatgpt, claude)
-  private model = 'gemma4:e4b';
+  private model = 'gpt-oss:20b';
   private userInfoPrompt!: string;
   private userResumePrompt!: string;
 
