@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { companies } from './.generated/company-listings.ts';
-import { Analyzer, type JobFitResponse } from './Analyzer.ts';
-import { convosDir, dataDir, repoRootDir } from './constants.ts';
-import { type ListedJob } from './scraping/Scraper.ts';
-import { Spinner } from './utils.ts';
+import { companies } from '../.generated/company-listings.ts';
+import { Analyzer, type JobFitResponse } from '../Analyzer.ts';
+import { convosDir, dataDir, repoRootDir } from '../constants.ts';
+import { type ListedJob } from '../scraping/Scraper.ts';
+import { Spinner } from '../utils.ts';
 
 type AnalyzedJob = ListedJob &
   JobFitResponse & {
@@ -17,14 +17,15 @@ async function main() {
   const analyzer = new Analyzer();
   await analyzer.init();
 
-  console.log(`Analyzing jobs from ${companies.length} companies`);
+  const companyEntries = Object.entries(companies);
+  console.log(`Analyzing jobs from ${companyEntries.length} companies`);
 
   const analyzedJobs: AnalyzedJob[] = [];
   const errors: Error[] = [];
   let _errors: Error[];
-  for (const company of companies) {
+  for (const [slug, company] of companyEntries) {
     const logTag = `[${company.name}] `;
-    using scraper = new company.Scraper(company.slug);
+    using scraper = new company.Scraper(slug);
 
     let spinner = new Spinner(logTag + `Fetching job listings...`).start();
     const jobs = await scraper.getJobsList();

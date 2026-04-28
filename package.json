@@ -3,7 +3,8 @@
   "scripts": {
     "lint": "prettier --check .",
     "lint-fix": "prettier --write .",
-    "typecheck": "tsc -b --pretty"
+    "typecheck": "tsc -b --pretty",
+    "analyze": "./bin/tsn ./src/entry/analyze.ts"
   },
   "volta": {
     "node": "25.2.1",

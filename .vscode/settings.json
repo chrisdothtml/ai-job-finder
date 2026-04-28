@@ -1,4 +1,9 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always",
+    "source.addMissingImports.ts": "always",
+    "source.fixAll.prettier": "always"
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "files.exclude": {
@@ -18,14 +23,10 @@
     "yarn.lock": true
   },
   // make sure TS auto-imports have the file extension (required for node)
-  "typescript.preferences.importModuleSpecifierEnding": "js",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "always",
-    "source.addMissingImports.ts": "always",
-    "source.fixAll.prettier": "always"
-  },
-  "typescript.preferences.organizeImports": {
+  "js/ts.preferences.importModuleSpecifierEnding": "js",
+  "js/ts.preferences.organizeImports": {
     "caseSensitivity": "caseInsensitive",
     "typeOrder": "last"
-  }
+  },
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }
