@@ -103,9 +103,9 @@ export class Analyzer {
     `),
     summarizeResume: dedent(`
       # Purpose
-      Your job is to analyze the user's provided resume and reduce their work experience down to a two-sentence-max summary of their work experience. This doesn't need to be all-encompassing, but should capture the diversity of their past experience.
+      Your job is to analyze the user's provided resume and reduce their work experience down to a brief summary of their work experience. This should be short (maximum paragraph), but should encompass all their past experience, technologies, and work types.
 
-      The context is that your summary will be used as a first-pass to reduce a list of available job titles to those that match the user's past experience. You can take their preferences into account to put emphasis on past experience relevant to their job search.
+      The context is that your summary will be used as a first-pass to reduce a list of many available job titles, to those that match the user's past experience. You can take their job preferences into account to put emphasis on past experience relevant to their job search.
     `),
   };
 
@@ -156,7 +156,7 @@ export class Analyzer {
     const sysPrompt = [
       Analyzer.prompts.reduceJobs,
       this.userInfoPrompt,
-      `## User work experience summary\n\n` +
+      `## User work experience summary\n` +
         (await this.generateResumeSummary()),
     ].join('\n\n');
 
