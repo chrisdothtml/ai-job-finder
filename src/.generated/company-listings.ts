@@ -1,4 +1,5 @@
 import { AshbyScraper } from '../scraping/AshbyScraper.ts';
+import { GitHubScraper } from '../scraping/GitHubScraper.ts';
 import { GreenhouseScraper } from '../scraping/GreenhouseScraper.ts';
 import { LeverScraper } from '../scraping/LeverScraper.ts';
 import { NetflixScraper } from '../scraping/NetflixScraper.ts';
@@ -21,6 +22,7 @@ export const companies: TechCompany[] = [
   { name: 'CoreWeave', slug: 'coreweave', Scraper: GreenhouseScraper },
   { name: 'Coupang', slug: 'coupang', Scraper: GreenhouseScraper },
   { name: 'Datadog', slug: 'datadog', Scraper: GreenhouseScraper },
+  { name: 'GitHub', slug: 'github', Scraper: GitHubScraper },
   { name: 'IonQ', slug: 'ionq', Scraper: GreenhouseScraper },
   { name: 'MongoDB', slug: 'mongodb', Scraper: GreenhouseScraper },
   { name: 'NetEase', slug: 'netease', Scraper: AshbyScraper },
