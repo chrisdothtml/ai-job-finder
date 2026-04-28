@@ -38,5 +38,6 @@ export const companies: Record<string, TechCompany> = {
   sofi: { name: 'SoFi', Scraper: GreenhouseScraper },
   spotify: { name: 'Spotify', Scraper: LeverScraper },
   twilio: { name: 'Twilio', Scraper: GreenhouseScraper },
+  vercel: { name: 'Vercel', Scraper: GreenhouseScraper },
   zscaler: { name: 'Zscaler', Scraper: GreenhouseScraper },
 };
