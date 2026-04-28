@@ -27,6 +27,7 @@ export const companies: Record<string, TechCompany> = {
   mongodb: { name: 'MongoDB', Scraper: GreenhouseScraper },
   netease: { name: 'NetEase', Scraper: AshbyScraper },
   netflix: { name: 'Netflix', Scraper: NetflixScraper },
+  openai: { name: 'OpenAI', Scraper: AshbyScraper },
   purestorage: { name: 'Pure Storage', Scraper: GreenhouseScraper },
   reddit: { name: 'Reddit', Scraper: GreenhouseScraper },
   robinhood: { name: 'Robinhood', Scraper: GreenhouseScraper },
