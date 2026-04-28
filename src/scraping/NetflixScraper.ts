@@ -1,5 +1,5 @@
 import { cachedFetch } from '../fetch.ts';
-import { time } from '../utils.ts';
+import { buildUrl, time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 const BASE_URL = 'https://explore.jobs.netflix.net';
@@ -36,7 +36,12 @@ export class NetflixScraper extends Scraper {
     let start = 0;
 
     while (true) {
-      const url = `${BASE_URL}/api/apply/v2/jobs?domain=${DOMAIN}&start=${start}&num=${PAGE_SIZE}&sort_by=relevance`;
+      const url = buildUrl(BASE_URL, '/api/apply/v2/jobs', {
+        domain: DOMAIN,
+        start,
+        num: testing ? 1 : PAGE_SIZE,
+        sort_by: 'relevance',
+      });
       const data = (await cachedFetch
         .call({ cache: !testing, cacheTTL: time.day }, url)
         .then((r) => r.json())) as NetflixJobsResponse;
@@ -48,17 +53,18 @@ export class NetflixScraper extends Scraper {
           title: pos.name,
           location: pos.locations.join(', ') || pos.location,
         });
+        if (testing) break;
       }
 
       start += data.positions.length;
-      if (start >= data.count || data.positions.length === 0) break;
+      if (testing || start >= data.count || data.positions.length === 0) break;
     }
 
     return jobs;
   }
 
   async getJobContent(id: string): Promise<string> {
-    const url = `${BASE_URL}/api/apply/v2/jobs/${id}?domain=${DOMAIN}`;
+    const url = buildUrl(BASE_URL, `/api/apply/v2/jobs/${id}`, { domain: DOMAIN });
     const data = (await cachedFetch
       .call({ cacheTTL: time.day }, url)
       .then((r) => r.json())) as NetflixJobDetail;

@@ -85,8 +85,9 @@ import { cachedFetch } from '../fetch.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 export class {Name}Scraper extends Scraper {
-  async getJobsList(): Promise<ListedJob[]> {
+  async getJobsList(testing = false): Promise<ListedJob[]> {
     // Fetch all pages via the API and return the full list
+    // if `testing` is true, only fetch a single job (if possible) to speed up tests
   }
 
   async getJobContent(id: string): Promise<string> {
@@ -115,7 +116,7 @@ export class {Name}Scraper extends Scraper {
     }
   }
 
-  async getJobsList(): Promise<ListedJob[]> {
+  async getJobsList(testing = false): Promise<ListedJob[]> {
     return this.withPage(async (page) => {
       // Navigate, handle pagination, and extract jobs from the DOM
       // Return ListedJob[] = { title: string; location: string; id: string }

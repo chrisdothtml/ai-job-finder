@@ -1,5 +1,5 @@
 import { cachedFetch } from '../fetch.ts';
-import { time } from '../utils.ts';
+import { buildUrl, time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 const BASE_URL = 'https://www.github.careers';
@@ -32,8 +32,14 @@ export class GitHubScraper extends Scraper {
     const jobs: ListedJob[] = [];
     let page = 1;
 
-    while (true) {
-      const url = `${BASE_URL}/api/jobs?page=${page}&sortBy=relevance&descending=false&internal=false&limit=${PAGE_SIZE}`;
+    paginateLoop: while (true) {
+      const url = buildUrl(BASE_URL, '/api/jobs', {
+        page,
+        sortBy: 'relevance',
+        descending: false,
+        internal: false,
+        limit: testing ? 1 : PAGE_SIZE,
+      });
       const data = (await cachedFetch
         .call({ cache: !testing, cacheTTL: time.day }, url)
         .then((r) => r.json())) as GitHubJobsResponse;
@@ -45,6 +51,7 @@ export class GitHubScraper extends Scraper {
           title: job.title,
           location: job.full_location || job.location_name || job.country,
         });
+        if (testing) break paginateLoop;
       }
 
       if (jobs.length >= data.totalCount || data.jobs.length === 0) break;
@@ -55,7 +62,14 @@ export class GitHubScraper extends Scraper {
   }
 
   async getJobContent(id: string): Promise<string> {
-    const url = `${BASE_URL}/api/jobs?page=1&sortBy=relevance&descending=false&internal=false&limit=1&req_id=${id}`;
+    const url = buildUrl(BASE_URL, '/api/jobs', {
+      page: 1,
+      sortBy: 'relevance',
+      descending: false,
+      internal: false,
+      limit: 1,
+      req_id: id,
+    });
     const data = (await cachedFetch
       .call({ cacheTTL: time.day }, url)
       .then((r) => r.json())) as GitHubJobsResponse;

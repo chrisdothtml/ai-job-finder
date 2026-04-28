@@ -22,6 +22,18 @@ export function getEnv(key: string, fallback?: string): string | null {
   return fallback ?? null;
 }
 
+export function buildUrl(
+  base: string,
+  path: string,
+  params: Record<string, string | number | boolean>
+): URL {
+  const url = new URL(path, base);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, String(value));
+  }
+  return url;
+}
+
 export interface GeoLocation {
   status: 'success' | 'fail';
   country: string;
