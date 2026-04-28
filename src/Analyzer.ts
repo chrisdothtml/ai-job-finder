@@ -200,7 +200,7 @@ export class Analyzer {
       Analyzer.prompts.summarizeResume,
       this.userInfoPrompt,
     ].join('\n\n');
-    const [response] = await ollamaChat(this.model, [
+    const [response] = await ollamaChat('gemma4:e4b', [
       { role: 'system', content: sysPrompt },
       { role: 'user', content: this.userResumePrompt },
     ]);
