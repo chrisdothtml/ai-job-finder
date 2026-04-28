@@ -1,4 +1,3 @@
-import assert from 'node:assert';
 import { cachedFetch } from '../fetch.ts';
 import { time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
@@ -57,23 +56,5 @@ export class GreenhouseScraper extends Scraper {
       res.json()
     );
     return JSON.stringify(res);
-  }
-
-  async test() {
-    const jobs = await this.getJobsList(true);
-
-    if (jobs.length > 0) {
-      const firstJob = jobs[0];
-      for (const [key, val] of Object.entries(firstJob)) {
-        assert.ok(
-          typeof val === 'string' && val.length > 0,
-          `fetched job has '${key}' prop`
-        );
-      }
-
-      const job = await this.getJobContent(firstJob.id);
-      assert.ok(typeof job === 'string');
-      assert.ok(job.length > 0);
-    }
   }
 }

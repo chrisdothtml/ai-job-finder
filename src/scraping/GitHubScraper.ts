@@ -1,4 +1,3 @@
-import assert from 'node:assert';
 import { cachedFetch } from '../fetch.ts';
 import { time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
@@ -61,23 +60,5 @@ export class GitHubScraper extends Scraper {
       .call({ cacheTTL: time.day }, url)
       .then((r) => r.json())) as GitHubJobsResponse;
     return JSON.stringify(data.jobs[0]?.data ?? {});
-  }
-
-  async test() {
-    const jobs = await this.getJobsList(true);
-
-    if (jobs.length > 0) {
-      const firstJob = jobs[0];
-      for (const [key, val] of Object.entries(firstJob)) {
-        assert.ok(
-          typeof val === 'string' && val.length > 0,
-          `fetched job has '${key}' prop`
-        );
-      }
-
-      const content = await this.getJobContent(firstJob.id);
-      assert.ok(typeof content === 'string');
-      assert.ok(content.length > 0);
-    }
   }
 }

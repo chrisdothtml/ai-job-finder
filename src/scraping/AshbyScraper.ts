@@ -1,4 +1,3 @@
-import assert from 'node:assert';
 import { cachedFetch } from '../fetch.ts';
 import { time } from '../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
@@ -78,23 +77,5 @@ export class AshbyScraper extends Scraper {
     const job = this.jobsCache.get(id);
     if (!job) throw new Error(`Job ${id} not found in cache`);
     return JSON.stringify(job);
-  }
-
-  async test() {
-    const jobs = await this.getJobsList(true);
-
-    if (jobs.length > 0) {
-      const firstJob = jobs[0];
-      for (const [key, val] of Object.entries(firstJob)) {
-        assert.ok(
-          typeof val === 'string' && val.length > 0,
-          `fetched job has '${key}' prop`
-        );
-      }
-
-      const job = await this.getJobContent(firstJob.id);
-      assert.ok(typeof job === 'string');
-      assert.ok(job.length > 0);
-    }
   }
 }

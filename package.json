@@ -3,6 +3,7 @@
   "scripts": {
     "lint": "prettier --check .",
     "lint-fix": "prettier --write .",
+    "test": "./bin/tsn --experimental-test-module-mocks --test",
     "typecheck": "tsc -b --pretty",
     "analyze": "./bin/tsn ./src/entry/analyze.ts"
   },
