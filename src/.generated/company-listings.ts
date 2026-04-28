@@ -3,6 +3,7 @@ import { GitHubScraper } from '../scraping/GitHubScraper.ts';
 import { GreenhouseScraper } from '../scraping/GreenhouseScraper.ts';
 import { LeverScraper } from '../scraping/LeverScraper.ts';
 import { NetflixScraper } from '../scraping/NetflixScraper.ts';
+import { ShopifyScraper } from '../scraping/ShopifyScraper.ts';
 import { type ScraperSubclass } from '../scraping/Scraper.ts';
 
 interface TechCompany {
@@ -31,6 +32,7 @@ export const companies: Record<string, TechCompany> = {
   robinhood: { name: 'Robinhood', Scraper: GreenhouseScraper },
   roku: { name: 'Roku', Scraper: GreenhouseScraper },
   samsara: { name: 'Samsara', Scraper: GreenhouseScraper },
+  shopify: { name: 'Shopify', Scraper: ShopifyScraper },
   snowflake: { name: 'Snowflake', Scraper: AshbyScraper },
   sofi: { name: 'SoFi', Scraper: GreenhouseScraper },
   spotify: { name: 'Spotify', Scraper: LeverScraper },

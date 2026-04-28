@@ -10,6 +10,7 @@ const TEST_COMPANIES: CompanySlug[] = [
   'block',
   'github',
   'netflix',
+  'shopify',
   'snowflake',
   'spotify',
 ];
