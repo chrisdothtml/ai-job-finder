@@ -20,6 +20,12 @@ The current basic flow is this:
 
 ## Running analysis
 
+<div align="center">
+  <img width="400" src=".github/assets/analyze-preview.png" alt="Preview of analyzer terminal output">
+</div>
+
+<br/>
+
 Currently, I run this on my gaming PC, which has an RTX 4090, so is very capable of running many open source LLM models locally.
 
 Tools you'll want to install: [Volta](https://volta.sh/), [Ollama](https://ollama.com/)
