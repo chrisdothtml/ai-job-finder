@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/png" href="./assets/favicon.png" />
+    <title>AI Job Finder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet" />
+    <script
+      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+      integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+      crossorigin="anonymous"></script>
+    <script
+      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+      integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+      crossorigin="anonymous"></script>
+    <script
+      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+      integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+      crossorigin="anonymous"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: oklch(97.5% 0.008 75);
+        --surface: oklch(99.5% 0.004 75);
+        --border: oklch(91% 0.008 75);
+        --border-hover: oklch(82% 0.01 75);
+        --text-primary: oklch(18% 0.01 75);
+        --text-secondary: oklch(48% 0.012 75);
+        --text-tertiary: oklch(62% 0.01 75);
+        --green: oklch(50% 0.13 145);
+        --green-bg: oklch(96% 0.03 145);
+        --green-border: oklch(88% 0.06 145);
+        --amber: oklch(56% 0.13 55);
+        --amber-bg: oklch(96.5% 0.025 75);
+        --amber-border: oklch(87% 0.07 65);
+        --accent: oklch(50% 0.13 145);
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      /* Toolbar */
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: oklch(99.5% 0.004 75 / 0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 24px;
+      }
+
+      .toolbar-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 60px;
+        flex-wrap: wrap;
+        padding: 8px 0;
+      }
+
+      .wordmark {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.03em;
+        white-space: nowrap;
+        margin-right: 4px;
+      }
+
+      .divider {
+        width: 1px;
+        height: 22px;
+        background: var(--border);
+        flex-shrink: 0;
+      }
+
+      .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 160px;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-tertiary);
+        pointer-events: none;
+        width: 15px;
+        height: 15px;
+      }
+
+      .search-input {
+        width: 100%;
+        height: 36px;
+        padding: 0 10px 0 32px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.15s;
+      }
+
+      .search-input::placeholder {
+        color: var(--text-tertiary);
+      }
+      .search-input:focus {
+        border-color: var(--border-hover);
+      }
+
+      /* Filter controls */
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .filter-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        white-space: nowrap;
+      }
+
+      /* Dropdown trigger */
+      .dropdown-root {
+        position: relative;
+      }
+
+      .dropdown-trigger {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        cursor: pointer;
+        white-space: nowrap;
+        outline: none;
+        transition: border-color 0.15s;
+        user-select: none;
+      }
+
+      .dropdown-trigger:hover {
+        border-color: var(--border-hover);
+      }
+      .dropdown-trigger.active {
+        border-color: var(--accent);
+        background: var(--green-bg);
+      }
+
+      .dropdown-trigger .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .chevron {
+        width: 12px;
+        height: 12px;
+        color: var(--text-tertiary);
+        transition: transform 0.15s;
+      }
+
+      .chevron.open {
+        transform: rotate(180deg);
+      }
+
+      .dropdown-panel {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        min-width: 200px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow:
+          0 4px 16px oklch(0% 0 0 / 0.08),
+          0 1px 3px oklch(0% 0 0 / 0.04);
+        z-index: 200;
+        overflow: hidden;
+        animation: dropIn 0.12s ease;
+      }
+
+      @keyframes dropIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .dropdown-header {
+        padding: 10px 12px 8px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .dropdown-header span {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .dropdown-clear {
+        font-size: 11.5px;
+        color: var(--accent);
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: inherit;
+        padding: 0;
+      }
+
+      .dropdown-clear:hover {
+        text-decoration: underline;
+      }
+
+      .dropdown-items {
+        padding: 6px 0;
+        max-height: 240px;
+        overflow-y: auto;
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        cursor: pointer;
+        font-size: 13.5px;
+        color: var(--text-primary);
+        transition: background 0.1s;
+      }
+
+      .dropdown-item:hover {
+        background: var(--bg);
+      }
+
+      .checkbox {
+        width: 15px;
+        height: 15px;
+        border: 1.5px solid var(--border-hover);
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.1s;
+      }
+
+      .checkbox.checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .checkbox.checked svg {
+        display: block;
+      }
+      .checkbox svg {
+        display: none;
+        width: 9px;
+        height: 9px;
+      }
+
+      /* Score filter */
+      .score-filter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        white-space: nowrap;
+      }
+
+      .score-filter label {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .score-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 80px;
+        height: 3px;
+        border-radius: 2px;
+        background: var(--border);
+        outline: none;
+        cursor: pointer;
+      }
+
+      .score-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--accent);
+        border: 2px solid white;
+        box-shadow: 0 0 0 1px var(--accent);
+        cursor: pointer;
+      }
+
+      .score-val {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--accent);
+        min-width: 26px;
+      }
+
+      /* Sort select */
+      .sort-select {
+        height: 36px;
+        padding: 0 28px 0 10px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        transition: border-color 0.15s;
+      }
+
+      .sort-select:hover {
+        border-color: var(--border-hover);
+      }
+
+      /* Result count */
+      .result-count {
+        font-size: 12.5px;
+        color: var(--text-tertiary);
+        white-space: nowrap;
+        margin-left: auto;
+      }
+
+      /* Main */
+      .main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 24px 60px;
+      }
+
+      /* Empty state */
+      .empty {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--text-tertiary);
+      }
+
+      .empty-title {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+      }
+
+      .empty p {
+        font-size: 14px;
+      }
+
+      /* Job grid */
+      .job-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+        gap: 14px;
+      }
+
+      /* Job card */
+      .job-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s,
+          transform 0.15s;
+        animation: cardIn 0.2s ease both;
+      }
+
+      @keyframes cardIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .job-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 4px 20px oklch(0% 0 0 / 0.06);
+        transform: translateY(-1px);
+      }
+
+      /* Card header */
+      .card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .card-meta {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .company-name {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-tertiary);
+        margin-bottom: 4px;
+      }
+
+      .job-title {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-size: 17.5px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        line-height: 1.25;
+        text-wrap: pretty;
+      }
+
+      .job-location {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        font-size: 12.5px;
+        color: var(--text-tertiary);
+      }
+
+      .job-location svg {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+      }
+
+      /* Score badge */
+      .score-badge {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+      }
+
+      .score-ring {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        position: relative;
+      }
+
+      .score-ring svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+      }
+
+      .score-ring .score-num {
+        position: relative;
+        z-index: 1;
+      }
+
+      .score-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Pros / Cons */
+      .pros-cons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .quote-block {
+        border-left: 2.5px solid;
+        padding: 8px 11px;
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        font-size: 13px;
+        line-height: 1.55;
+        text-wrap: pretty;
+      }
+
+      .quote-block.pros {
+        border-color: var(--green);
+        background: var(--green-bg);
+        color: oklch(32% 0.09 145);
+      }
+
+      .quote-block.cons {
+        border-color: var(--amber);
+        background: var(--amber-bg);
+        color: oklch(38% 0.09 55);
+      }
+
+      .quote-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 3px;
+        opacity: 0.65;
+      }
+
+      /* Card footer */
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-top: 2px;
+      }
+
+      .view-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        text-decoration: none;
+        padding: 6px 12px;
+        border: 1px solid var(--green-border);
+        border-radius: var(--radius-sm);
+        background: var(--green-bg);
+        transition: all 0.15s;
+      }
+
+      .view-link:hover {
+        background: var(--green);
+        border-color: var(--green);
+        color: white;
+      }
+
+      .view-link svg {
+        width: 13px;
+        height: 13px;
+        transition: transform 0.15s;
+      }
+
+      .view-link:hover svg {
+        transform: translate(1px, -1px);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useEffect, useRef, useCallback } = React;
+
+      /* ── Score color helpers ── */
+      function scoreColor(s) {
+        if (s >= 0.85)
+          return {
+            ring: 'oklch(50% 0.13 145)',
+            track: 'oklch(88% 0.06 145)',
+            bg: 'oklch(96% 0.03 145)',
+            text: 'oklch(35% 0.1 145)',
+          };
+        if (s >= 0.7)
+          return {
+            ring: 'oklch(62% 0.14 115)',
+            track: 'oklch(89% 0.06 115)',
+            bg: 'oklch(96.5% 0.025 115)',
+            text: 'oklch(38% 0.1 115)',
+          };
+        if (s >= 0.55)
+          return {
+            ring: 'oklch(62% 0.13 55)',
+            track: 'oklch(87% 0.07 65)',
+            bg: 'oklch(96.5% 0.025 75)',
+            text: 'oklch(40% 0.09 55)',
+          };
+        return {
+          ring: 'oklch(55% 0.15 25)',
+          track: 'oklch(88% 0.06 25)',
+          bg: 'oklch(97% 0.02 25)',
+          text: 'oklch(40% 0.1 25)',
+        };
+      }
+
+      /* ── Score ring SVG ── */
+      function ScoreRing({ score }) {
+        const c = scoreColor(score);
+        const pct = Math.round(score * 100);
+        const r = 20,
+          cx = 24,
+          cy = 24,
+          circ = 2 * Math.PI * r;
+        const dash = circ * score;
+        return (
+          <div className="score-badge">
+            <div
+              className="score-ring"
+              style={{ background: c.bg, color: c.text }}>
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={r}
+                  stroke={c.track}
+                  strokeWidth="3.5"
+                />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={r}
+                  stroke={c.ring}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeDasharray={`${dash} ${circ}`}
+                />
+              </svg>
+              <span className="score-num">{pct}%</span>
+            </div>
+            <span className="score-label">Match</span>
+          </div>
+        );
+      }
+
+      /* ── Company dropdown ── */
+      function CompanyDropdown({ companies, selected, onChange }) {
+        const [open, setOpen] = useState(false);
+        const ref = useRef(null);
+
+        useEffect(() => {
+          function handler(e) {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+          }
+          document.addEventListener('mousedown', handler);
+          return () => document.removeEventListener('mousedown', handler);
+        }, []);
+
+        const toggle = (c) => {
+          const next = new Set(selected);
+          if (next.has(c)) next.delete(c);
+          else next.add(c);
+          onChange(next);
+        };
+
+        const count = selected.size;
+
+        return (
+          <div className="dropdown-root" ref={ref}>
+            <button
+              className={`dropdown-trigger ${count > 0 ? 'active' : ''}`}
+              onClick={() => setOpen((o) => !o)}>
+              Company
+              {count > 0 && <span className="badge">{count}</span>}
+              <svg
+                className={`chevron ${open ? 'open' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {open && (
+              <div className="dropdown-panel">
+                <div className="dropdown-header">
+                  <span>Filter by company</span>
+                  {count > 0 && (
+                    <button
+                      className="dropdown-clear"
+                      onClick={() => onChange(new Set())}>
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="dropdown-items">
+                  {companies.map((c) => (
+                    <div
+                      key={c}
+                      className="dropdown-item"
+                      onClick={() => toggle(c)}>
+                      <div
+                        className={`checkbox ${selected.has(c) ? 'checked' : ''}`}>
+                        <svg
+                          viewBox="0 0 10 8"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round">
+                          <polyline points="1 4 3.5 6.5 9 1" />
+                        </svg>
+                      </div>
+                      {c}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      /* ── Job card ── */
+      function JobCard({ job, idx }) {
+        return (
+          <div className="job-card" style={{ animationDelay: `${idx * 30}ms` }}>
+            <div className="card-header">
+              <div className="card-meta">
+                <div className="company-name">{job.companyName}</div>
+                <div className="job-title">{job.title}</div>
+                <div className="job-location">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {job.location}
+                </div>
+              </div>
+              <ScoreRing score={job.fitScore} />
+            </div>
+
+            <div className="pros-cons">
+              <div className="quote-block pros">
+                <div className="quote-label">Pros</div>
+                {job.pros}
+              </div>
+              <div className="quote-block cons">
+                <div className="quote-label">Cons</div>
+                {job.cons}
+              </div>
+            </div>
+
+            <div className="card-footer">
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="view-link">
+                View posting
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        );
+      }
+
+      /* ── Main App ── */
+      function App() {
+        const [jobs, setJobs] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [query, setQuery] = useState('');
+        const [selectedCompanies, setSelectedCompanies] = useState(new Set());
+        const [minScore, setMinScore] = useState(0);
+        const [sortBy, setSortBy] = useState('score-desc');
+
+        useEffect(() => {
+          fetch('jobs.json')
+            .then((r) => r.json())
+            .then((data) => {
+              setJobs(data);
+              setLoading(false);
+            })
+            .catch(() => setLoading(false));
+        }, []);
+
+        const companies = [...new Set(jobs.map((j) => j.companyName))].sort();
+
+        const filtered = jobs
+          .filter((j) => {
+            if (
+              selectedCompanies.size > 0 &&
+              !selectedCompanies.has(j.companyName)
+            )
+              return false;
+            if (j.fitScore < minScore) return false;
+            if (query.trim()) {
+              const q = query.toLowerCase();
+              return [j.title, j.companyName, j.location, j.pros, j.cons].some(
+                (field) => field?.toLowerCase().includes(q)
+              );
+            }
+            return true;
+          })
+          .sort((a, b) => {
+            switch (sortBy) {
+              case 'score-desc':
+                return b.fitScore - a.fitScore;
+              case 'score-asc':
+                return a.fitScore - b.fitScore;
+              case 'company':
+                return a.companyName.localeCompare(b.companyName);
+              case 'title':
+                return a.title.localeCompare(b.title);
+              default:
+                return 0;
+            }
+          });
+
+        const scoreLabel =
+          minScore === 0 ? 'Any' : `≥${Math.round(minScore * 100)}%`;
+
+        return (
+          <>
+            <header className="toolbar">
+              <div className="toolbar-inner">
+                <span className="wordmark">JobFinder</span>
+                <div className="divider" />
+
+                {/* Search */}
+                <div className="search-wrap">
+                  <svg
+                    className="search-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    className="search-input"
+                    type="text"
+                    placeholder="Search jobs…"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
+                </div>
+
+                {/* Company filter */}
+                <CompanyDropdown
+                  companies={companies}
+                  selected={selectedCompanies}
+                  onChange={setSelectedCompanies}
+                />
+
+                {/* Score filter */}
+                <div className="score-filter">
+                  <label>Match</label>
+                  <input
+                    className="score-slider"
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={minScore}
+                    onChange={(e) => setMinScore(+e.target.value)}
+                  />
+                  <span className="score-val">{scoreLabel}</span>
+                </div>
+
+                {/* Sort */}
+                <select
+                  className="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="score-desc">Match: High → Low</option>
+                  <option value="score-asc">Match: Low → High</option>
+                  <option value="company">Company A → Z</option>
+                  <option value="title">Title A → Z</option>
+                </select>
+
+                <span className="result-count">
+                  {loading ? '—' : `${filtered.length} of ${jobs.length} jobs`}
+                </span>
+              </div>
+            </header>
+
+            <main className="main">
+              {loading ? (
+                <div className="empty">
+                  <p>Loading…</p>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="empty">
+                  <div className="empty-title">No jobs found</div>
+                  <p>Try adjusting your search or filters.</p>
+                </div>
+              ) : (
+                <div className="job-grid">
+                  {filtered.map((job, i) => (
+                    <JobCard key={job.id} job={job} idx={i} />
+                  ))}
+                </div>
+              )}
+            </main>
+          </>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>

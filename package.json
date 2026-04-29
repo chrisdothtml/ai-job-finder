@@ -5,7 +5,10 @@
     "lint-fix": "prettier --write .",
     "test": "./bin/tsn --experimental-test-module-mocks --test",
     "typecheck": "tsc -b --pretty",
-    "analyze": "./bin/tsn ./src/entry/analyze.ts"
+    "analyze": "./bin/tsn ./src/entry/analyze.ts",
+    "ui:build:base": "esbuild src/entry/ui.ts --bundle --outfile=public/index.js --format=esm",
+    "ui:build": "yarn ui:build:base --minify",
+    "ui:dev": "yarn ui:build:base --sourcemap=inline --watch --servedir=public"
   },
   "volta": {
     "node": "25.2.1",
@@ -13,6 +16,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.18.0",
+    "esbuild": "^0.28.0",
     "prettier": "^3.6.2",
     "prettier-plugin-sh": "^0.18.0",
     "typescript": "^5.9.2"
