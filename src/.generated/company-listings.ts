@@ -3,8 +3,8 @@ import { GitHubScraper } from '../scraping/GitHubScraper.ts';
 import { GreenhouseScraper } from '../scraping/GreenhouseScraper.ts';
 import { LeverScraper } from '../scraping/LeverScraper.ts';
 import { NetflixScraper } from '../scraping/NetflixScraper.ts';
-import { ShopifyScraper } from '../scraping/ShopifyScraper.ts';
 import { type ScraperSubclass } from '../scraping/Scraper.ts';
+import { ShopifyScraper } from '../scraping/ShopifyScraper.ts';
 
 interface TechCompany {
   name: string;
@@ -22,6 +22,7 @@ export const companies: Record<string, TechCompany> = {
   coreweave: { name: 'CoreWeave', Scraper: GreenhouseScraper },
   coupang: { name: 'Coupang', Scraper: GreenhouseScraper },
   datadog: { name: 'Datadog', Scraper: GreenhouseScraper },
+  figma: { name: 'Figma', Scraper: GreenhouseScraper },
   github: { name: 'GitHub', Scraper: GitHubScraper },
   ionq: { name: 'IonQ', Scraper: GreenhouseScraper },
   mongodb: { name: 'MongoDB', Scraper: GreenhouseScraper },
