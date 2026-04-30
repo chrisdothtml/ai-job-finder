@@ -6,7 +6,7 @@ import { convosDir, dataDir, repoRootDir } from '../constants.ts';
 import { type ListedJob } from '../scraping/Scraper.ts';
 import { Spinner } from '../utils.ts';
 
-type AnalyzedJob = ListedJob &
+export type AnalyzedJob = ListedJob &
   JobFitResponse & {
     companyName: string;
   };

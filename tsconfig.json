@@ -4,6 +4,7 @@
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "bundler",
+    "jsx": "react",
     "noEmit": true,
     "strict": true,
     "strictNullChecks": true,
