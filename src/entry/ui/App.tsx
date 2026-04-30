@@ -3,6 +3,7 @@ import { type AnalyzedJob } from '../analyze.ts';
 import { CompanyDropdown } from './CompanyDropdown.tsx';
 import './index.css';
 import { JobCard } from './JobCard.tsx';
+import { Logo } from './Logo.tsx';
 
 async function fetchJobs(): Promise<AnalyzedJob[]> {
   return fetch('jobs.json').then((r) => r.json()) as Promise<AnalyzedJob[]>;
@@ -61,8 +62,9 @@ export function App() {
 
   return (
     <>
-      <header className="toolbar">
+      <header className="toolbar no-select">
         <div className="toolbar-inner">
+          <Logo className="header-logo"></Logo>
           <span className="wordmark">JobFinder</span>
           <div className="divider" />
 
@@ -112,7 +114,7 @@ export function App() {
 
           {/* Sort */}
           <select
-            className="sort-select"
+            className="sort-select no-select"
             value={sortBy}
             // @ts-expect-error
             onChange={(e) => setSortBy(e.target.value)}>
