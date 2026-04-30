@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { companies } from '../.generated/company-listings.ts';
 import { Analyzer, type JobFitResponse } from '../Analyzer.ts';
-import { convosDir, dataDir, repoRootDir } from '../constants.ts';
+import { convosDir, dataDir, publicDir, repoRootDir } from '../constants.ts';
 import { type ListedJob } from '../scraping/Scraper.ts';
 import { Spinner } from '../utils.ts';
 
@@ -97,7 +97,7 @@ async function main() {
   }
   console.log('');
 
-  const outputFilePath = path.join(dataDir, 'analysis.json');
+  const outputFilePath = path.join(publicDir, 'jobs.json');
   const relOutputFilePath = path.relative(repoRootDir, outputFilePath);
   const finalJobsList = analyzedJobs
     .filter((j) => j.fitScore > 0.6)

@@ -43,9 +43,19 @@ After you've added the `resume.md` and `job-preferences.md` files into the `.dat
 yarn analyze
 ```
 
-When it finishes, it'll spit out an `analysis.json` file in the `.data` dir, containing a list of jobs which are potentially a good fit for you & and their fitness scores, pros/cons, etc.
+When it finishes, it'll spit out the results to `public/jobs.json` (which the UI reads from), containing a list of jobs which are potentially a good fit for you & and their fitness scores, pros/cons, etc.
 
 Since the analysis can take hours to run (depending on how many companies it's running against), I personally `ssh` into a WSL linux instance on my gaming PC, and use `tmux` to create a shell that I start the analysis process in and can check in on later.
+
+### Environment vars
+
+If you want to run this from a separate machine than the one running ollama, you can define `OLLAMA_HOST` in a `.env` file (make sure the machine running ollama has the port exposed inside your network). e.g.
+
+**.env**
+
+```
+OLLAMA_HOST="http://192.168.1.xxx:11434"
+```
 
 ## Web UI
 
@@ -55,12 +65,16 @@ Since the analysis can take hours to run (depending on how many companies it's r
 
 <br/>
 
-The web UI is very early in its development. So far I've just taken what Claude Design spit out based on a very specific prompt for what I was looking for in this interface (and surprisingly it was spot on with the very first prompt).
-
-The way it works currently is that you drop the `.data/analysis.json` file (spit out by the analysis flow) into the `public` dir, then you can run:
+The web UI is early in its development, but the way it works currently is that the analysis flow spits out the results to `public/jobs.json`, which the UI reads from at runtime; so after you run the analysis, you can run:
 
 ```sh
 yarn ui:dev
+```
+
+OR, for a static production build:
+
+```sh
+yarn ui:build && yarn ui:start
 ```
 
 and you'll see your analyzed job list in the browser.
