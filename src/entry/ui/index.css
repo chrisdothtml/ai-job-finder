@@ -617,3 +617,70 @@ body {
 .view-link:hover svg {
   transform: translate(1px, -1px);
 }
+
+/* ── Mobile ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .toolbar {
+    padding: 0 14px;
+  }
+
+  .toolbar-inner {
+    height: auto;
+    padding: 10px 0;
+    gap: 8px;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  /* Result count stays on first row, right-aligned */
+  .result-count {
+    order: 3;
+    margin-left: auto;
+    font-size: 12px;
+  }
+
+  /* Search takes its own full-width row */
+  .search-wrap {
+    order: 10;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Filters row below search */
+  .dropdown-root { order: 20; }
+  .score-filter  { order: 21; }
+  .sort-select   { order: 22; }
+
+  /* Hide "Match" text label to save space */
+  .score-filter label {
+    display: none;
+  }
+
+  /* Prevent dropdown panel from clipping off-screen */
+  .dropdown-panel {
+    left: auto;
+    right: 0;
+  }
+
+  .main {
+    padding: 16px 14px 48px;
+  }
+
+  .job-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .job-card {
+    padding: 16px 18px;
+  }
+
+  /* Larger touch target for slider thumb */
+  .score-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
+}
