@@ -3,6 +3,7 @@ import { GitHubScraper } from '../scraping/GitHubScraper.ts';
 import { GreenhouseScraper } from '../scraping/GreenhouseScraper.ts';
 import { LeverScraper } from '../scraping/LeverScraper.ts';
 import { NetflixScraper } from '../scraping/NetflixScraper.ts';
+import { NvidiaScraper } from '../scraping/NvidiaScraper.ts';
 import { type ScraperSubclass } from '../scraping/Scraper.ts';
 import { ShopifyScraper } from '../scraping/ShopifyScraper.ts';
 
@@ -30,6 +31,7 @@ export const companies: Record<string, TechCompany> = {
   mozilla: { name: 'Mozilla', Scraper: GreenhouseScraper },
   netease: { name: 'NetEase', Scraper: AshbyScraper },
   netflix: { name: 'Netflix', Scraper: NetflixScraper },
+  nvidia: { name: 'NVIDIA', Scraper: NvidiaScraper },
   openai: { name: 'OpenAI', Scraper: AshbyScraper },
   purestorage: { name: 'Pure Storage', Scraper: GreenhouseScraper },
   reddit: { name: 'Reddit', Scraper: GreenhouseScraper },
