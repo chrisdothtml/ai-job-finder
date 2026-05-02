@@ -3,11 +3,19 @@ name: create-scraper
 description: Given a careers page URL, uses Playwright browser tools to explore the page, identify reliable scraping patterns (preferring hidden JSON APIs over DOM scraping), then writes a TypeScript Scraper subclass for that company
 ---
 
-Your goal is to explore a company's careers page and write a permanent, reliable `Scraper` subclass that other code can use going forward. The argument is a careers page URL, e.g. `/create-scraper https://explore.jobs.netflix.net/careers`.
+Your goal is to explore a company's careers page and write a permanent, reliable `Scraper` subclass that other code can use going forward. The argument is either:
 
-## Step 1 — Identify the company name
+1. the name of a company, e.g. `/create-scraper netflix`
+2. a careers page URL, e.g. `/create-scraper https://explore.jobs.netflix.net/careers`, or
+
+## Step 1a - Identify the url for the careers page
+
+If the careers page has been provided as the argument, move to the next step; otherwise search "[company-name] careers" on google and navigate until you find the careers page.
+
+## Step 1b — Identify the company name
 
 Derive the class name and filename from the company's domain or brand name. E.g.:
+
 - `explore.jobs.netflix.net` → `NetflixScraper` → `src/scraping/NetflixScraper.ts`
 - `jobs.stripe.com` → `StripeScraper` → `src/scraping/StripeScraper.ts`
 
@@ -21,13 +29,18 @@ The goal is to find a JSON API the page calls internally — these are far more 
 ```js
 window.__reqs = [];
 const _f = window.fetch.bind(window);
-window.fetch = function(input, init) {
-  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+window.fetch = function (input, init) {
+  const url =
+    typeof input === 'string'
+      ? input
+      : input instanceof URL
+        ? input.href
+        : input.url;
   window.__reqs.push({ url, method: (init?.method || 'GET').toUpperCase() });
   return _f(input, init);
 };
 const _open = XMLHttpRequest.prototype.open;
-XMLHttpRequest.prototype.open = function(method, url) {
+XMLHttpRequest.prototype.open = function (method, url) {
   window.__reqs.push({ url: String(url), method: method.toUpperCase() });
   return _open.apply(this, arguments);
 };
@@ -37,7 +50,7 @@ XMLHttpRequest.prototype.open = function(method, url) {
 4. Interact with the page to trigger data loads: scroll to the bottom, wait a moment, then retrieve what was captured:
 
 ```js
-window.__reqs
+window.__reqs;
 ```
 
 5. Look for requests that look like job listing APIs — JSON endpoints with paths like `/api/jobs`, `/search`, `/v1/positions`, `/careers/api`, etc. Filter out analytics, fonts, images, and tracking pixels.
@@ -67,6 +80,7 @@ Click through to page 2 (or trigger a "Load more"), confirm the data pattern hol
 ## Step 5 — Inspect a job detail page
 
 Navigate to 1–2 individual job listings:
+
 1. Either call the detail API endpoint directly (if found)
 2. Or click a job link and `browser_snapshot` the detail page
 
