@@ -1,5 +1,5 @@
-import { cachedFetch } from '../fetch.ts';
-import { buildUrl, time } from '../utils.ts';
+import { cachedFetch } from '../../../fetch.ts';
+import { buildUrl, time } from '../../../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 interface LeverJob {
@@ -25,10 +25,14 @@ export class LeverScraper extends Scraper {
   }
 
   async getJobsList(testing = false): Promise<ListedJob[]> {
-    const url = buildUrl('https://api.lever.co', `/v0/postings/${this.companySlug}`, {
-      mode: 'json',
-      ...(testing ? { limit: 1 } : {}),
-    });
+    const url = buildUrl(
+      'https://api.lever.co',
+      `/v0/postings/${this.companySlug}`,
+      {
+        mode: 'json',
+        ...(testing ? { limit: 1 } : {}),
+      }
+    );
     const jobs = (await cachedFetch
       .call({ cache: !testing, cacheTTL: time.day }, url)
       .then((res) => res.json())) as LeverJob[];

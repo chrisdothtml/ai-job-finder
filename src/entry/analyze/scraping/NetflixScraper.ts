@@ -1,5 +1,5 @@
-import { cachedFetch } from '../fetch.ts';
-import { buildUrl, time } from '../utils.ts';
+import { cachedFetch } from '../../../fetch.ts';
+import { buildUrl, time } from '../../../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 const BASE_URL = 'https://explore.jobs.netflix.net';
@@ -64,7 +64,9 @@ export class NetflixScraper extends Scraper {
   }
 
   async getJobContent(id: string): Promise<string> {
-    const url = buildUrl(BASE_URL, `/api/apply/v2/jobs/${id}`, { domain: DOMAIN });
+    const url = buildUrl(BASE_URL, `/api/apply/v2/jobs/${id}`, {
+      domain: DOMAIN,
+    });
     const data = (await cachedFetch
       .call({ cacheTTL: time.day }, url)
       .then((r) => r.json())) as NetflixJobDetail;

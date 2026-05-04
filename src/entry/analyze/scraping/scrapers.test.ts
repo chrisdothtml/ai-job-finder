@@ -1,6 +1,6 @@
 import { test } from 'node:test';
-import { companies } from '../.generated/company-listings.ts';
-import { getEnv } from '../utils.ts';
+import { getEnv } from '../../../utils.ts';
+import { companies } from '../companies.ts';
 
 type CompanySlug = keyof typeof companies;
 // hand-selected list to ensure all types of scrapers are covered

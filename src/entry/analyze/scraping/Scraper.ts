@@ -2,7 +2,7 @@ import builtinAssert from 'node:assert';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { type TestContext } from 'node:test';
-import { dataDir } from '../constants.ts';
+import { dataDir } from '../../../constants.ts';
 
 export abstract class Scraper {
   constructor(protected companySlug: string) {}

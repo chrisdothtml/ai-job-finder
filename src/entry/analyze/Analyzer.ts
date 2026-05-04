@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { dataDir } from './constants.ts';
-import { type ListedJob } from './scraping/Scraper.ts';
+import { dataDir } from '../../constants.ts';
 import {
   dedent,
   getGeoLocation,
   ollamaChat,
   type GeoLocation,
-} from './utils.ts';
+} from '../../utils.ts';
+import { type ListedJob } from './scraping/Scraper.ts';
 
 export interface JobFitResponse {
   fitScore: number;

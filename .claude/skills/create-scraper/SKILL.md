@@ -156,7 +156,7 @@ Pagination in DOM scrapers: look for a "Next" button or "Load more" and loop unt
 - `getJobContent` should return a rich string — either `JSON.stringify(apiResponse)` or the full text of the job posting — since it's passed to the Analyzer to assess fit
 - Handle pagination fully in `getJobsList` — return all jobs, not just page 1
 - The `location` field can be a comma-joined string if multiple locations exist
-- When you're done, update `company-listings.ts` accordingly
+- When you're done, update `src/entry/analyze/companies.ts` accordingly
 
 ## Step 7 — Verify
 

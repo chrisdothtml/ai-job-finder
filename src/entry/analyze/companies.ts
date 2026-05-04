@@ -1,11 +1,11 @@
-import { AshbyScraper } from '../scraping/AshbyScraper.ts';
-import { GitHubScraper } from '../scraping/GitHubScraper.ts';
-import { GreenhouseScraper } from '../scraping/GreenhouseScraper.ts';
-import { LeverScraper } from '../scraping/LeverScraper.ts';
-import { NetflixScraper } from '../scraping/NetflixScraper.ts';
-import { NvidiaScraper } from '../scraping/NvidiaScraper.ts';
-import { type ScraperSubclass } from '../scraping/Scraper.ts';
-import { ShopifyScraper } from '../scraping/ShopifyScraper.ts';
+import { AshbyScraper } from './scraping/AshbyScraper.ts';
+import { GitHubScraper } from './scraping/GitHubScraper.ts';
+import { GreenhouseScraper } from './scraping/GreenhouseScraper.ts';
+import { LeverScraper } from './scraping/LeverScraper.ts';
+import { NetflixScraper } from './scraping/NetflixScraper.ts';
+import { NvidiaScraper } from './scraping/NvidiaScraper.ts';
+import { type ScraperSubclass } from './scraping/Scraper.ts';
+import { ShopifyScraper } from './scraping/ShopifyScraper.ts';
 
 interface TechCompany {
   name: string;

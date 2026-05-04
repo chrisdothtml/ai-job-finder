@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { companies } from '../.generated/company-listings.ts';
-import { Analyzer, type JobFitResponse } from '../Analyzer.ts';
 import { convosDir, dataDir, publicDir, repoRootDir } from '../constants.ts';
-import { type ListedJob } from '../scraping/Scraper.ts';
 import { Spinner } from '../utils.ts';
+import { Analyzer, type JobFitResponse } from './analyze/Analyzer.ts';
+import { companies } from './analyze/companies.ts';
+import { type ListedJob } from './analyze/scraping/Scraper.ts';
 
 export type AnalyzedJob = ListedJob &
   JobFitResponse & {

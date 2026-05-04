@@ -1,5 +1,5 @@
-import { cachedFetch } from '../fetch.ts';
-import { time } from '../utils.ts';
+import { cachedFetch } from '../../../fetch.ts';
+import { time } from '../../../utils.ts';
 import { Scraper, type ListedJob } from './Scraper.ts';
 
 const BASE_URL = 'https://www.shopify.com';
