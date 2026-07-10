@@ -11,4 +11,4 @@ From there, you need to figure out if they have jobs posted on commonly-used job
 2. Lever: run a HEAD request to `https://jobs.lever.co/{COMPANY_NAME}` (to keep requests lightweight) to determine whether the company has jobs listed on lever
 3. Ashby: fetch `https://api.ashbyhq.com/posting-api/job-board/{COMPANY_NAME}` — returns 200 if the company has an Ashby board, 404 if not. (Do NOT use a HEAD request to `jobs.ashbyhq.com` — that site is a SPA and returns 200 for all paths regardless of whether the company exists.)
 
-Then write any companies you found, along with their jobs board type to `src/entry/analyze/companies.ts`. Do NOT modify the Typescript types in this file.
+Then write any companies you found, along with their jobs board type to `src/analysis/companies.ts`. Do NOT modify the Typescript types in this file.

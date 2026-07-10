@@ -16,8 +16,8 @@ If the careers page has been provided as the argument, move to the next step; ot
 
 Derive the class name and filename from the company's domain or brand name. E.g.:
 
-- `explore.jobs.netflix.net` → `NetflixScraper` → `src/scraping/NetflixScraper.ts`
-- `jobs.stripe.com` → `StripeScraper` → `src/scraping/StripeScraper.ts`
+- `explore.jobs.netflix.net` → `NetflixScraper` → `src/analysis/scraping/NetflixScraper.ts`
+- `jobs.stripe.com` → `StripeScraper` → `src/analysis/scraping/StripeScraper.ts`
 
 ## Step 2 — Navigate and capture network traffic
 
@@ -88,7 +88,7 @@ Understand what data is available: full description, requirements, salary, etc. 
 
 ## Step 6 — Write the Scraper
 
-Now write `src/scraping/{Name}Scraper.ts`. The approach depends on what you found above.
+Now write `src/analysis/scraping/{Name}Scraper.ts`. The approach depends on what you found above.
 
 ### 6a — API-based scraper (preferred)
 
@@ -156,10 +156,16 @@ Pagination in DOM scrapers: look for a "Next" button or "Load more" and loop unt
 - `getJobContent` should return a rich string — either `JSON.stringify(apiResponse)` or the full text of the job posting — since it's passed to the Analyzer to assess fit
 - Handle pagination fully in `getJobsList` — return all jobs, not just page 1
 - The `location` field can be a comma-joined string if multiple locations exist
-- When you're done, update `src/entry/analyze/companies.ts` accordingly
 
-## Step 7 — Verify
+## Step 7 — Register the company in `companies.ts`
+
+Add the new company to the `companies` object in `src/analysis/companies.ts`, filling in **every** field of the `Company` interface. Use the `WebSearch` tool to research the company:
+
+- `homepage`: resolve the company's official homepage URL via web search. It must start with `https://` and must **not** have a trailing slash (e.g. `https://www.stripe.com`, not `http://stripe.com/`)
+- `summary`: a very brief description of the company (2 sentences max) — what it does/makes and anything notably distinctive, based on your web search results
+
+## Step 8 — Verify
 
 Run `yarn typecheck` to confirm the file compiles cleanly. Fix any type errors before reporting done.
 
-Add the new company to `scrapers.test.ts` then run `TEST_COMPANIES=[COMPANY_SLUG] yarn test ./src/scraping/scrapers.test.ts`
+Add the new company to `scrapers.test.ts` then run `TEST_COMPANIES=[COMPANY_SLUG] yarn test ./src/analysis/scraping/scrapers.test.ts`

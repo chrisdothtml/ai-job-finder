@@ -10,7 +10,7 @@ The current basic flow is this:
 
 1. User drops `resume.md` and `job-preferences.md` into the `.data` directory
 
-2. Use [scrapers](./src/scraping/) which can reliably fetch all the jobs a given company has available
+2. Use [scrapers](./src/analysis/scraping/) which can reliably fetch all the jobs a given company has available
 
 - Initially I was writing these scrapers manually, but now they're pretty much entirely written by Claude Code via [skills](./.claude/skills/)
 
@@ -34,16 +34,19 @@ Once you have Ollama installed, you'll need to fetch the models I currently use 
 
 ```sh
 ollama pull gpt-oss:20b
-ollama pull gemma4:e4b
 ```
 
 After you've added the `resume.md` and `job-preferences.md` files into the `.data` directory (there's no real format required for these files, just standard markdown files), you can run the analysis via:
 
 ```sh
+# install deps
+yarn install
+
+# run analysis
 yarn analyze
 ```
 
-When it finishes, it'll spit out the results to `public/jobs.json` (which the UI reads from), containing a list of jobs which are potentially a good fit for you & and their fitness scores, pros/cons, etc.
+When it finishes, it'll spit out the results to `~/.ai-job-finder/jobs.json` (which the UI reads from), containing a list of jobs which are potentially a good fit for you & and their fitness scores, pros/cons, etc.
 
 Since the analysis can take hours to run (depending on how many companies it's running against), I personally `ssh` into a WSL linux instance on my gaming PC, and use `tmux` to create a shell that I start the analysis process in and can check in on later.
 
@@ -65,16 +68,16 @@ OLLAMA_HOST="http://192.168.1.xxx:11434"
 
 <br/>
 
-The web UI is early in its development, but the way it works currently is that the analysis flow spits out the results to `public/jobs.json`, which the UI reads from at runtime; so after you run the analysis, you can run:
+The web UI is early in its development, but after you run the analysis, you can run:
 
 ```sh
-yarn ui:dev
+yarn dev
 ```
 
 OR, for a static production build:
 
 ```sh
-yarn ui:build && yarn ui:start
+yarn build && yarn start
 ```
 
 and you'll see your analyzed job list in the browser.

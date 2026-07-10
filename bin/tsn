@@ -5,6 +5,10 @@
 ###
 
 volta="$HOME/.volta/bin/volta"
-node="$($volta which node)"
+if [ -e "$volta" ]; then
+  node="$($volta which node)"
+else
+  node="$(which node)"
+fi
 
 $node --experimental-transform-types --no-warnings "${@}"

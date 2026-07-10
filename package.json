@@ -1,30 +1,41 @@
 {
   "type": "module",
   "scripts": {
+    "// checks": "----------------------------",
     "lint": "prettier --check .",
     "lint-fix": "prettier --write .",
     "test": "./bin/tsn --experimental-test-module-mocks --test",
     "typecheck": "tsc -b --pretty",
-    "analyze": "./bin/tsn --env-file=.env ./src/entry/analyze.ts",
-    "ui:build:base": "esbuild src/entry/ui.tsx --bundle --outdir=public/bundles --format=esm",
-    "ui:dev": "yarn ui:build:base --sourcemap=inline --watch --servedir=public --define:DEV=true",
-    "ui:build": "yarn ui:build:base --minify --define:DEV=false",
-    "ui:start": "serve public"
+    "// utils": "-----------------------------",
+    "server:start": "./bin/tsn --env-file=.env ./src/server/index.ts",
+    "ui:build:base": "esbuild src/ui/index.tsx --bundle --outdir=public/bundles --external:'node:*' --format=esm",
+    "// entrypoints": "-----------------------",
+    "analyze": "./bin/tsn --env-file=.env ./src/analysis/analyze.ts",
+    "dev": "nodemon -w src/server -e ts -x 'yarn server:start'",
+    "build": "yarn ui:build:base --minify --define:DEV=false",
+    "start": "NODE_ENV=production yarn server:start"
   },
   "volta": {
     "node": "25.2.1",
     "yarn": "4.13.0"
   },
   "dependencies": {
+    "@koa/bodyparser": "^6.1.0",
+    "@koa/router": "^15.5.0",
+    "@opendocsg/pdf2md": "^0.2.7",
+    "esbuild": "^0.28.0",
+    "koa": "^3.2.0",
+    "koa-static": "^5.0.0",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "serve": "^14.2.6"
+    "react-dom": "^19.2.5"
   },
   "devDependencies": {
+    "@types/koa": "^3.0.2",
+    "@types/koa-static": "^4.0.4",
     "@types/node": "^22.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "esbuild": "^0.28.0",
+    "nodemon": "^3.1.14",
     "prettier": "^3.6.2",
     "prettier-plugin-sh": "^0.18.0",
     "typescript": "^5.9.2"

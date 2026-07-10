@@ -1,0 +1,161 @@
+.llm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+  50% {
+    background-color: var(--green-bg);
+    border-color: var(--green-border);
+  }
+  100% {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+}
+
+.llm-btn.idle:not(:disabled):not(:hover) {
+  animation: pulse 1s linear infinite;
+}
+
+.llm-btn:hover:not(:disabled):not(.success) {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.llm-btn:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.llm-btn svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.llm-btn.testing {
+  color: var(--text-secondary);
+  border-color: var(--border-hover);
+}
+
+.llm-btn.success {
+  background: var(--green-bg);
+  border-color: var(--green-border);
+  color: var(--accent);
+}
+
+.llm-btn.fail {
+  background: oklch(97% 0.025 25);
+  border-color: oklch(85% 0.07 25);
+  color: oklch(50% 0.17 25);
+}
+
+/* Tooltip wrapper for fail state */
+.llm-btn-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.llm-btn-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  max-width: 320px;
+  background: oklch(20% 0.01 75);
+  color: oklch(96% 0.005 75);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: 0 6px 20px oklch(0% 0 0 / 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-3px);
+  transition:
+    opacity 0.12s,
+    transform 0.12s,
+    visibility 0.12s;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.llm-btn-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  background: oklch(20% 0.01 75);
+  transform: rotate(45deg);
+}
+
+.llm-btn-wrap:hover .llm-btn-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.llm-btn-tooltip-title {
+  font-weight: 600;
+  color: oklch(78% 0.16 25);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.llm-btn-tooltip-title svg {
+  width: 12px;
+  height: 12px;
+}
+
+.llm-btn-tooltip-detail {
+  color: oklch(82% 0.005 75);
+}
+
+.llm-btn-tooltip-code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: oklch(72% 0.04 75);
+  margin-top: 4px;
+  padding: 4px 6px;
+  background: oklch(15% 0.01 75);
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.llm-btn .spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--text-secondary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
