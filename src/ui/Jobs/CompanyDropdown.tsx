@@ -28,15 +28,17 @@ export function CompanyDropdown({
     onChange(next);
   };
 
-  const count = selected.size;
+  // all companies are selected by default, so the trigger only lights up
+  // once some have been unselected (i.e. the list is actually filtered)
+  const filtering = companies.length > 0 && selected.size < companies.length;
 
   return (
     <div className="dropdown-root" ref={ref}>
       <button
-        className={`dropdown-trigger ${count > 0 ? 'active' : ''}`}
+        className={`dropdown-trigger ${filtering ? 'active' : ''}`}
         onClick={() => setOpen((o) => !o)}>
         Company
-        {count > 0 && <span className="badge">{count}</span>}
+        {filtering && <span className="badge">{selected.size}</span>}
         <svg
           className={`chevron ${open ? 'open' : ''}`}
           viewBox="0 0 24 24"
@@ -50,13 +52,18 @@ export function CompanyDropdown({
         <div className="dropdown-panel">
           <div className="dropdown-header">
             <span>Filter by company</span>
-            {count > 0 && (
+            <div className="dropdown-header-actions">
+              <button
+                className="dropdown-clear"
+                onClick={() => onChange(new Set(companies))}>
+                All
+              </button>
               <button
                 className="dropdown-clear"
                 onClick={() => onChange(new Set())}>
-                Clear
+                None
               </button>
-            )}
+            </div>
           </div>
           <div className="dropdown-items">
             {companies.map((c) => (

@@ -7,7 +7,7 @@ export type CompanyInfo = Company & { slug: string };
 
 // renders nothing if the favicon can't be fetched (e.g. the company's
 // homepage changed and google has no icon for the old domain)
-function CompanyFavicon({ slug }: { slug: string }) {
+export function CompanyFavicon({ slug }: { slug: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return null;
   return (
@@ -26,7 +26,7 @@ function CompanyFavicon({ slug }: { slug: string }) {
 // under the toolbar
 const TOOLTIP_FLIP_THRESHOLD = 180;
 
-function SummaryTip({ summary }: { summary: string }) {
+export function SummaryTip({ summary }: { summary: string }) {
   const [openBelow, setOpenBelow] = useState(false);
 
   // measured when the tooltip is triggered rather than on scroll, since the
@@ -67,26 +67,31 @@ export function JobCard({
   job,
   idx,
   company,
+  hideCompany,
 }: {
   job: AnalyzedJob;
   idx: number;
   company?: CompanyInfo;
+  // set when a surrounding company group already shows the company info
+  hideCompany?: boolean;
 }) {
   return (
     <div className="job-card" style={{ animationDelay: `${idx * 30}ms` }}>
       <div className="card-header">
         <div className="card-meta">
-          <div className="company-name">
-            {company && <CompanyFavicon slug={company.slug} />}
-            {company ? (
-              <a href={company.homepage} target="_blank">
-                {job.companyName}
-              </a>
-            ) : (
-              job.companyName
-            )}
-            {company && <SummaryTip summary={company.summary} />}
-          </div>
+          {!hideCompany && (
+            <div className="company-name">
+              {company && <CompanyFavicon slug={company.slug} />}
+              {company ? (
+                <a href={company.homepage} target="_blank">
+                  {job.companyName}
+                </a>
+              ) : (
+                job.companyName
+              )}
+              {company && <SummaryTip summary={company.summary} />}
+            </div>
+          )}
           <div className="job-title">{job.title}</div>
           <div className="job-location">
             <svg
@@ -112,7 +117,7 @@ export function JobCard({
         </div>
         <div className="quote-block cons">
           <div className="quote-label">Cons</div>
-          {job.cons}
+          {job.cons || '(none)'}
         </div>
       </div>
 

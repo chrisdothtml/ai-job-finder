@@ -6,6 +6,7 @@ import {
   isValidUserInfo,
   type PartialAnalyzerSettings,
 } from '../../analysis/types.ts';
+import { Modal } from '../Modal.tsx';
 import { type AppStorage } from '../storage.ts';
 import { CompaniesSettings } from './CompaniesSettings.tsx';
 import { defaultConfig, LLMSettings } from './LLMSettings.tsx';
@@ -29,9 +30,56 @@ const STEPS = [
     label: 'Companies',
     isValid: (d: PartialAnalyzerSettings) => isValidAnalyzerSettings(d),
   },
-];
+] as const;
+
+type StepId = (typeof STEPS)[number]['id'];
 
 const ALL_COMPANY_SLUGS = Object.keys(companies);
+
+function StepIndicator({
+  step,
+  goToStep,
+}: {
+  step: number;
+  goToStep: (i: number) => void;
+}) {
+  return (
+    <div className="step-indicator">
+      {STEPS.map((s, i) => (
+        <React.Fragment key={s.id}>
+          <div className="step-item">
+            <div
+              className={`step-dot ${i === step ? 'active' : i < step ? 'done' : ''}`}
+              style={{ cursor: i < step ? 'pointer' : 'default' }}
+              onClick={() => i < step && goToStep(i)}>
+              {i < step ? (
+                <svg
+                  width="10"
+                  height="8"
+                  viewBox="0 0 10 8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <polyline points="1 4 3.5 6.5 9 1" />
+                </svg>
+              ) : (
+                i + 1
+              )}
+            </div>
+            <span className={`step-label ${i === step ? 'active' : ''}`}>
+              {s.label}
+            </span>
+          </div>
+          {i < STEPS.length - 1 && (
+            <div className={`step-connector ${i < step ? 'done' : ''}`}></div>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
 
 export function SettingsModal({
   appStorage,
@@ -52,16 +100,15 @@ export function SettingsModal({
       ? appStorage.settings
       : appStorage.partialSettings),
   }));
-  const canContinue = STEPS[step].isValid(formData);
 
   const bodyRef = useRef<HTMLDivElement>(null);
-  // scroll to top on step change
+  // scroll to top on step change (onboarding only)
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = 0;
   }, [step]);
 
   /**
-   * each step owns one section of the settings and updates it explicitly
+   * each section owns one slice of the settings and updates it explicitly
    * (no deep merging). `patchUserInfo` shallow-patches so that async writers
    * (geo fetch, resume parse, summary generation) can't clobber each other;
    * nested objects (geo) must be passed whole.
@@ -83,122 +130,85 @@ export function SettingsModal({
     setFormData((prev) => ({ ...prev, companiesList }));
   }
 
-  function goToStep(i: number) {
-    setStep(i);
+  const sections: Record<StepId, React.ReactNode> = {
+    llm: <LLMSettings config={formData.config ?? {}} setConfig={setConfig} />,
+    profile: (
+      <ProfileSettings
+        userInfo={formData.userInfo ?? {}}
+        patchUserInfo={patchUserInfo}
+        config={formData.config ?? {}}
+      />
+    ),
+    companies: (
+      <CompaniesSettings
+        companiesList={formData.companiesList ?? []}
+        setCompaniesList={setCompaniesList}
+      />
+    ),
+  };
+
+  function saveAndClose() {
+    // only overwrite completed settings with a fully-valid draft
+    if (!isValidAnalyzerSettings(formData)) return;
+    setAppStorage({ isOnboarded: true, settings: formData });
+    onClose();
   }
+
+  // post-onboarding: one long modal with every section, edited freely and
+  // saved (or discarded) as a whole
+  if (appStorage.isOnboarded) {
+    return (
+      <Modal
+        title="Settings"
+        onClose={onClose}
+        footer={
+          <>
+            <button className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary ml-auto"
+              disabled={!isValidAnalyzerSettings(formData)}
+              onClick={saveAndClose}>
+              Save changes
+            </button>
+          </>
+        }>
+        <div className="settings-sections">
+          {STEPS.map((s) => (
+            <div className="settings-section" key={s.id}>
+              {sections[s.id]}
+            </div>
+          ))}
+        </div>
+      </Modal>
+    );
+  }
+
+  // onboarding: guided step-by-step flow (not dismissable until finished)
+  const canContinue = STEPS[step].isValid(formData);
   function goToPrevStep() {
     if (step > 0) setStep((s) => s - 1);
   }
   function goToNextStep() {
     if (!canContinue) return;
 
-    if (!appStorage.isOnboarded && !isLastStep) {
+    if (isLastStep) {
+      saveAndClose();
+    } else {
       // progressively save during onboarding
       setAppStorage({ isOnboarded: false, partialSettings: formData });
-    } else if (isValidAnalyzerSettings(formData)) {
-      // only overwrite completed settings with a fully-valid draft
-      setAppStorage({ isOnboarded: true, settings: formData });
-    }
-
-    if (isLastStep) {
-      onClose();
-    } else {
-      if (step < STEPS.length - 1) setStep((s) => s + 1);
+      setStep((s) => s + 1);
     }
   }
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={(e) => {
-        if (!appStorage.isOnboarded) return;
-        if (e.target === e.currentTarget) onClose();
-      }}>
-      <div className="modal" role="dialog" aria-modal="true">
-        {/* Header */}
-        <div className="modal-header">
-          <div className="modal-top-row">
-            <span className="modal-wordmark">
-              {appStorage.isOnboarded ? 'Settings' : 'JobFinder · Setup'}
-            </span>
-            {appStorage.isOnboarded && (
-              <button
-                className="modal-close"
-                onClick={onClose}
-                aria-label="Close">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* Step indicator */}
-          <div className="step-indicator">
-            {STEPS.map((s, i) => (
-              <React.Fragment key={s.id}>
-                <div className="step-item">
-                  <div
-                    className={`step-dot ${i === step ? 'active' : i < step ? 'done' : ''}`}
-                    style={{ cursor: i < step ? 'pointer' : 'default' }}
-                    onClick={() => i < step && goToStep(i)}>
-                    {i < step ? (
-                      <svg
-                        width="10"
-                        height="8"
-                        viewBox="0 0 10 8"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round">
-                        <polyline points="1 4 3.5 6.5 9 1" />
-                      </svg>
-                    ) : (
-                      i + 1
-                    )}
-                  </div>
-                  <span className={`step-label ${i === step ? 'active' : ''}`}>
-                    {s.label}
-                  </span>
-                </div>
-                {i < STEPS.length - 1 && (
-                  <div
-                    className={`step-connector ${i < step ? 'done' : ''}`}></div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="modal-body" ref={bodyRef}>
-          {step === 0 && (
-            <LLMSettings config={formData.config ?? {}} setConfig={setConfig} />
-          )}
-          {step === 1 && (
-            <ProfileSettings
-              userInfo={formData.userInfo ?? {}}
-              patchUserInfo={patchUserInfo}
-              config={formData.config ?? {}}
-            />
-          )}
-          {step === 2 && (
-            <CompaniesSettings
-              companiesList={formData.companiesList ?? []}
-              setCompaniesList={setCompaniesList}
-            />
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="modal-footer">
+    <Modal
+      title="JobFinder · Setup"
+      header={<StepIndicator step={step} goToStep={setStep} />}
+      bodyRef={bodyRef}
+      footer={
+        <>
           {step > 0 && (
             <button className="btn btn-ghost" onClick={goToPrevStep}>
               <svg
@@ -213,29 +223,26 @@ export function SettingsModal({
               Back
             </button>
           )}
-          <div
-            className="ml-auto"
-            style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <button
-              className="btn btn-primary"
-              disabled={!canContinue}
-              onClick={goToNextStep}>
-              {isLastStep ? 'Save & finish' : 'Continue'}
-              {!isLastStep && (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          <button
+            className="btn btn-primary ml-auto"
+            disabled={!canContinue}
+            onClick={goToNextStep}>
+            {isLastStep ? 'Save & finish' : 'Continue'}
+            {!isLastStep && (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            )}
+          </button>
+        </>
+      }>
+      {sections[STEPS[step].id]}
+    </Modal>
   );
 }

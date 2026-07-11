@@ -3,47 +3,83 @@ import {
   type PartialAnalyzerSettings,
 } from '../analysis/types.ts';
 
-export const defaultStorage: AppStorage = {
+const storageDisabled = window.location.search === '?storageDisabled';
+
+export const defaultAppStorage: AppStorage = {
   isOnboarded: false,
   partialSettings: {},
 };
 
-class Storage {
-  static storageKey = 'ai-job-finder-storage';
+class Storage<T extends object> {
+  private data: T;
 
-  private storage: AppStorage;
-  constructor() {
-    const existingStorage = JSON.parse(
-      window.localStorage.getItem(Storage.storageKey) ?? 'null'
-    );
+  constructor(
+    private key: string,
+    defaultValue: T
+  ) {
+    if (storageDisabled) {
+      this.data = { ...defaultValue };
+      return;
+    }
 
-    if (existingStorage == null) {
-      this.storage = { ...defaultStorage };
+    const existing = ((): T | null => {
+      try {
+        return JSON.parse(window.localStorage.getItem(this.key) ?? 'null');
+      } catch {
+        return null;
+      }
+    })();
+
+    if (existing == null) {
+      this.data = { ...defaultValue };
       this.save();
       return;
     }
 
-    this.storage = existingStorage;
+    this.data = existing;
   }
 
   get() {
-    return this.storage;
+    return this.data;
   }
 
-  set(data: AppStorage) {
-    this.storage = data;
+  set(data: T) {
+    this.data = data;
     this.save();
   }
 
+  update(patch: Partial<T>) {
+    this.set({ ...this.data, ...patch });
+  }
+
   private save() {
-    window.localStorage.setItem(
-      Storage.storageKey,
-      JSON.stringify(this.storage)
-    );
+    if (storageDisabled) return;
+
+    window.localStorage.setItem(this.key, JSON.stringify(this.data));
   }
 }
 
-export const storage = new Storage();
+export const appStorage = new Storage<AppStorage>(
+  'ai-job-finder-storage',
+  defaultAppStorage
+);
+
+// view preferences for the jobs list; stored under a separate key so
+// full-object writes to the app storage (e.g. saving settings) can't
+// clobber them
+export interface UIPrefsStorage {
+  minScore?: number;
+  groupByCompany?: boolean;
+  // stored inverted (unselected rather than selected) so companies that
+  // appear in a later scrape are auto-selected, and ones that disappear
+  // can simply be pruned
+  unselectedCompanies?: string[];
+}
+
+export const uiPrefsStorage = new Storage<UIPrefsStorage>(
+  'ai-job-finder-ui-prefs',
+  { minScore: 0.8, groupByCompany: true }
+);
 
 export type AppStorage =
   | {

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { type Company } from '../../analysis/companies.ts';
 import { type AnalyzedJob } from '../../analysis/manager.ts';
+import { uiPrefsStorage } from '../storage.ts';
 import { CompanyDropdown } from './CompanyDropdown.tsx';
+import { CompanyGroup } from './CompanyGroup.tsx';
 import { JobCard, type CompanyInfo } from './JobCard.tsx';
 import './Jobs.css';
 import { Logo } from './Logo.tsx';
@@ -34,13 +36,28 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [selectedCompanies, setSelectedCompanies] = useState(new Set<string>());
-  const [minScore, setMinScore] = useState(0);
+  const [minScore, setMinScore] = useState(
+    () => uiPrefsStorage.get().minScore ?? 0
+  );
+  const [groupByCompany, setGroupByCompany] = useState(
+    () => uiPrefsStorage.get().groupByCompany ?? false
+  );
   const [sortBy, setSortBy] = useState<SortTypes>('score-desc');
 
   useEffect(() => {
     fetchJobs()
       .then((data) => {
         setJobs(data);
+        // all companies start selected except previously unselected ones;
+        // pruning stale prefs entries here means companies that reappear
+        // later come back selected, like any other new company
+        const selected = new Set(data.map((j) => j.companyName));
+        const unselected = (
+          uiPrefsStorage.get().unselectedCompanies ?? []
+        ).filter((c) => selected.has(c));
+        uiPrefsStorage.update({ unselectedCompanies: unselected });
+        for (const c of unselected) selected.delete(c);
+        setSelectedCompanies(selected);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -53,8 +70,7 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
 
   const filtered = jobs
     .filter((j) => {
-      if (selectedCompanies.size > 0 && !selectedCompanies.has(j.companyName))
-        return false;
+      if (!selectedCompanies.has(j.companyName)) return false;
       if (j.fitScore < minScore) return false;
       if (query.trim()) {
         const q = query.toLowerCase();
@@ -78,6 +94,17 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
           return 0;
       }
     });
+
+  // groups follow the encounter order of the sorted list, so e.g. with
+  // "Match: High → Low" the company with the single best match comes first
+  const grouped = new Map<string, AnalyzedJob[]>();
+  if (groupByCompany) {
+    for (const job of filtered) {
+      const group = grouped.get(job.companyName) ?? [];
+      group.push(job);
+      grouped.set(job.companyName, group);
+    }
+  }
 
   const scoreLabel = minScore === 0 ? 'Any' : `≥${Math.round(minScore * 100)}%`;
 
@@ -111,43 +138,96 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
             />
           </div>
 
-          {/* Company filter */}
-          <CompanyDropdown
-            companies={companies}
-            selected={selectedCompanies}
-            onChange={setSelectedCompanies}
-          />
-
-          {/* Score filter */}
-          <div className="score-filter">
-            <label>Match</label>
-            <input
-              className="score-slider"
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={minScore}
-              onChange={(e) => setMinScore(+e.target.value)}
+          <div className="toolbar-filters">
+            {/* Company filter */}
+            <CompanyDropdown
+              companies={companies}
+              selected={selectedCompanies}
+              onChange={(next) => {
+                setSelectedCompanies(next);
+                uiPrefsStorage.update({
+                  unselectedCompanies: companies.filter((c) => !next.has(c)),
+                });
+              }}
             />
-            <span className="score-val">{scoreLabel}</span>
+
+            {/* Score filter */}
+            <div className="score-filter">
+              <label>Match</label>
+              <input
+                className="score-slider"
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={minScore}
+                onChange={(e) => {
+                  const value = +e.target.value;
+                  setMinScore(value);
+                  uiPrefsStorage.update({ minScore: value });
+                }}
+              />
+              <span className="score-val">{scoreLabel}</span>
+            </div>
+
+            {/* Sort */}
+            <select
+              className="sort-select no-select"
+              value={sortBy}
+              // @ts-expect-error
+              onChange={(e) => setSortBy(e.target.value)}>
+              <option value="score-desc">Match: High → Low</option>
+              <option value="score-asc">Match: Low → High</option>
+              <option value="company">Company A → Z</option>
+              <option value="title">Title A → Z</option>
+            </select>
+
+            {/* Group by company */}
+            <label className="group-toggle">
+              <input
+                type="checkbox"
+                checked={groupByCompany}
+                onChange={(e) => {
+                  setGroupByCompany(e.target.checked);
+                  uiPrefsStorage.update({ groupByCompany: e.target.checked });
+                }}
+              />
+              <span className={`checkbox ${groupByCompany ? 'checked' : ''}`}>
+                <svg
+                  viewBox="0 0 10 8"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <polyline points="1 4 3.5 6.5 9 1" />
+                </svg>
+              </span>
+              Group by company
+            </label>
+
+            <span className="result-count">
+              {loading ? '—' : `${filtered.length} of ${jobs.length} jobs`}
+            </span>
           </div>
 
-          {/* Sort */}
-          <select
-            className="sort-select no-select"
-            value={sortBy}
-            // @ts-expect-error
-            onChange={(e) => setSortBy(e.target.value)}>
-            <option value="score-desc">Match: High → Low</option>
-            <option value="score-asc">Match: Low → High</option>
-            <option value="company">Company A → Z</option>
-            <option value="title">Title A → Z</option>
-          </select>
-
-          <span className="result-count">
-            {loading ? '—' : `${filtered.length} of ${jobs.length} jobs`}
-          </span>
+          <button
+            className="settings-btn"
+            onClick={onOpenSettings}
+            title="Settings"
+            aria-label="Settings">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span className="settings-btn-label">Settings</span>
+          </button>
         </div>
       </header>
 
@@ -160,6 +240,17 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
           <div className="empty">
             <div className="empty-title">No jobs found</div>
             <p>Try adjusting your search or filters.</p>
+          </div>
+        ) : groupByCompany ? (
+          <div className="company-groups">
+            {[...grouped].map(([name, groupJobs]) => (
+              <CompanyGroup
+                key={name}
+                name={name}
+                jobs={groupJobs}
+                company={companyInfo.get(name)}
+              />
+            ))}
           </div>
         ) : (
           <div className="job-grid">
