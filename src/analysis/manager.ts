@@ -249,22 +249,7 @@ export class Manager {
     // a late abort must not be overwritten by the Complete state below
     signal.throwIfAborted();
 
-    const finalJobsList = analyzedJobs
-      .filter((j) => j.fitScore > 0.6)
-      .sort((a, b) => {
-        // 1. sort by fitness score
-        const scoreDiff = b.fitScore - a.fitScore;
-        if (scoreDiff !== 0) return scoreDiff;
-
-        // 2. sort by company name
-        const companyDiff = a.companyName.localeCompare(b.companyName);
-        if (companyDiff !== 0) return companyDiff;
-
-        // 3. sort by id
-        return a.id.localeCompare(b.id);
-      });
-
-    await fs.writeFile(jobsFile, JSON.stringify(finalJobsList, null, 2));
+    await fs.writeFile(jobsFile, JSON.stringify(analyzedJobs, null, 2));
     this.updateState({
       status: AnalysisStateStatus.Complete,
       finishTs: Date.now(),
