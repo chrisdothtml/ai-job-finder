@@ -34,9 +34,9 @@ export const managerEvents = new EventEmitter<{
  */
 const pctAdds = {
   fetchJobs: 0.01,
-  reduceJobs: 0.48,
+  reduceJobs: 0.73,
   fetchJobInfo: 0.03,
-  genFitness: 0.48,
+  genFitness: 0.23,
 };
 
 export class Manager {
