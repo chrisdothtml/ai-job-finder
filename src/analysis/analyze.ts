@@ -41,10 +41,10 @@ async function analyze(settings: AnalyzerSettings) {
         }
 
         for (let i = 0; i < newMsgs.length - 1; i++) {
-          new Spinner(newMsgs[i]).succeed(newMsgs[i]);
+          new Spinner(newMsgs[i].text).succeed(newMsgs[i].text);
         }
 
-        const lastMsg = newMsgs[newMsgs.length - 1];
+        const lastMsg = newMsgs[newMsgs.length - 1].text;
         if (running) {
           spinner = new Spinner(lastMsg).start();
         } else {

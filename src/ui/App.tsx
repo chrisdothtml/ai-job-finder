@@ -4,10 +4,6 @@ import { Jobs } from './Jobs/Jobs.tsx';
 import { SettingsModal } from './Settings/SettingsModal.tsx';
 import { appStorage, type AppStorage } from './storage.ts';
 
-export function LegacyApp() {
-  return <Jobs onOpenSettings={() => {}}></Jobs>;
-}
-
 export function App() {
   // storage reads are synchronous, so state can initialize directly from it
   const [storageState, setStorageState] = useState<AppStorage>(() =>
@@ -28,7 +24,9 @@ export function App() {
         />
       )}
       {storageState.isOnboarded && (
-        <Jobs onOpenSettings={() => setShowModal(true)}></Jobs>
+        <Jobs
+          settings={storageState.settings}
+          onOpenSettings={() => setShowModal(true)}></Jobs>
       )}
     </>
   );

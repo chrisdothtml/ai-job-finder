@@ -121,6 +121,13 @@ api.get('/api/jobs', async (ctx) => {
   }
 });
 
+// deletes the analyzed-jobs file (an in-progress run would immediately
+// rewrite it, so the ui only offers this while no run is active)
+api.post('/api/jobs/clear', async (ctx) => {
+  await fs.rm(jobsFile, { force: true });
+  ctx.body = { ok: true };
+});
+
 // verifies that the provider in `config` is reachable, the credentials are
 // valid, and the chosen model is usable; always responds 200 with
 // `{ ok: true } | { ok: false, failure: LLMError }`
@@ -210,15 +217,17 @@ api.post('/api/analysis/start', async (ctx) => {
   }
 
   manager.startAnalysis(settings);
-  ctx.body = null;
+  ctx.body = { ok: true };
 });
 
 api.post('/api/analysis/abort', async (ctx) => {
   manager.abortAnalysis();
-  ctx.body = null;
+  ctx.body = { ok: true };
 });
 
-// TODO: test to make sure this works in the frontend
+// streams every analysis state change as an SSE event, starting with the
+// current state; stays open for the lifetime of the client (`EventSource`
+// auto-reconnects, so closing on idle would just cause a reconnect loop)
 api.get('/api/analysis/events', async (ctx) => {
   // Set SSE headers
   ctx.set('Content-Type', 'text/event-stream');
@@ -232,9 +241,6 @@ api.get('/api/analysis/events', async (ctx) => {
 
   function onEvent(state: ManagerEventMap[ManagerEvent.State]) {
     stream.write(`data: ${JSON.stringify(state)}\n\n`);
-    if (!manager.isRunning(state)) {
-      stream.end();
-    }
   }
 
   onEvent(manager.state);

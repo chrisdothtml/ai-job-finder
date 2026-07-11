@@ -78,7 +78,7 @@ export interface UIPrefsStorage {
 
 export const uiPrefsStorage = new Storage<UIPrefsStorage>(
   'ai-job-finder-ui-prefs',
-  { minScore: 0.8, groupByCompany: true }
+  { minScore: 0.6, groupByCompany: true }
 );
 
 export type AppStorage =

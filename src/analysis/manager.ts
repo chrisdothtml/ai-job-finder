@@ -58,16 +58,18 @@ export class Manager {
 
   startAnalysis(settings: AnalyzerSettings) {
     if (this.isRunning()) return;
-    this.analyze(settings).catch((e) => {
-      const error = e as Error;
-      // If analysis is aborted, an `AbortError` will be thrown, stopping
-      // the process from continuing. If that's what we're catching here,
-      // then just ignore it
-      if (error.name === 'AbortError') return;
+    // created synchronously with the isRunning check, so an abort can never
+    // land in the window before the async analyze body assigns it
+    this.ac = new AbortController();
+    const { signal } = this.ac;
+    this.analyze(settings, signal).catch((e) => {
+      // an aborted run exits by throwing (from whichever abort check it hits
+      // first); the state was already finalized by `abortAnalysis`
+      if (signal.aborted) return;
 
       // for all other unhandled exceptions, force an abort
-      console.error(error);
-      this.state.errors.push(error.stack ?? error.message);
+      const error = e as Error;
+      this.addError(error);
       this.abortAnalysis('Unhandled exception');
     });
   }
@@ -120,11 +122,21 @@ export class Manager {
   private addMessage(message: string, state?: Partial<AnalysisState>) {
     this.updateState({
       ...state,
-      messages: this.state.messages.concat(message),
+      messages: this.state.messages.concat({ ts: Date.now(), text: message }),
     });
   }
 
-  private async analyze(settings: AnalyzerSettings) {
+  /**
+   * Record a non-fatal error: logged to the server console (the only place
+   * errors are surfaced for now) and kept in state for the post-run analysis
+   */
+  private addError(e: unknown) {
+    const error = e as Error;
+    console.error(error);
+    this.state.errors.push(error.stack ?? String(e));
+  }
+
+  private async analyze(settings: AnalyzerSettings, signal: AbortSignal) {
     const { companiesList } = settings;
 
     // convos dir is just for analyzing the convos of the past run
@@ -135,15 +147,16 @@ export class Manager {
       status: AnalysisStateStatus.Running,
       percent: 0,
       messages: [
-        `Preparing to analyze jobs from ${companiesList.length} companies`,
+        {
+          ts: Date.now(),
+          text: `Preparing to analyze jobs from ${companiesList.length} companies`,
+        },
       ],
       errors: [],
       startTs: Date.now(),
       finishTs: -1,
     });
 
-    this.ac = new AbortController();
-    const { signal } = this.ac;
     const analyzer = new Analyzer(settings, signal);
 
     // preload analysis model into memory
@@ -152,6 +165,11 @@ export class Manager {
     const analyzedJobs: AnalyzedJob[] = [];
     const numCompanies = companiesList.length;
     for (let i = 0; i < numCompanies; i++) {
+      // abort exits by throwing (here at the loop boundaries, and from the
+      // catch blocks below for in-flight work); `startAnalysis` swallows the
+      // throw since `abortAnalysis` already finalized the state
+      signal.throwIfAborted();
+
       const slug = companiesList[i];
       const company = companies[slug];
       const logTag = `[${company.name}] `;
@@ -163,7 +181,8 @@ export class Manager {
       try {
         jobs = await scraper.getJobsList();
       } catch (error) {
-        this.state.errors.push((error as Error).stack!);
+        signal.throwIfAborted();
+        this.addError(error);
         this.addMessage(logTag + `Failed to fetch job listings`);
         continue;
       } finally {
@@ -180,7 +199,8 @@ export class Manager {
         const shouldKeepJob = await analyzer
           .jobIsPotentialFit(job)
           .catch((error) => {
-            this.state.errors.push(error.stack!);
+            signal.throwIfAborted();
+            this.addError(error);
             // keep the job if it failed, just in case
             return true;
           });
@@ -198,7 +218,8 @@ export class Manager {
             const content = await scraper.getJobContent(job.id);
             return { ...job, content };
           } catch (error) {
-            this.state.errors.push((error as Error).stack!);
+            signal.throwIfAborted();
+            this.addError(error);
             return null;
           }
         })
@@ -216,13 +237,17 @@ export class Manager {
           analyzedJobs.push({ ...job, ...analysis, companyName: company.name });
           await fs.writeFile(jobsFile, JSON.stringify(analyzedJobs, null, 2));
         } catch (error) {
-          this.state.errors.push((error as Error).stack!);
+          signal.throwIfAborted();
+          this.addError(error);
           continue;
         } finally {
           this.increasePercent(pctAdds.genFitness / jobsListLen / numCompanies);
         }
       }
     }
+
+    // a late abort must not be overwritten by the Complete state below
+    signal.throwIfAborted();
 
     const finalJobsList = analyzedJobs
       .filter((j) => j.fitScore > 0.6)

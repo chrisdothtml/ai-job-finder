@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { type Company } from '../../analysis/companies.ts';
 import { type AnalyzedJob } from '../../analysis/manager.ts';
+import { type AnalyzerSettings } from '../../analysis/types.ts';
 import { uiPrefsStorage } from '../storage.ts';
+import { AnalysisPanel } from './AnalysisPanel.tsx';
 import { CompanyDropdown } from './CompanyDropdown.tsx';
 import { CompanyGroup } from './CompanyGroup.tsx';
 import { JobCard, type CompanyInfo } from './JobCard.tsx';
@@ -28,7 +30,13 @@ async function fetchCompanyInfo(): Promise<Map<string, CompanyInfo>> {
 
 type SortTypes = 'score-desc' | 'score-asc' | 'company' | 'title';
 
-export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function Jobs({
+  settings,
+  onOpenSettings,
+}: {
+  settings: AnalyzerSettings;
+  onOpenSettings: () => void;
+}) {
   const [jobs, setJobs] = useState<AnalyzedJob[]>([]);
   const [companyInfo, setCompanyInfo] = useState<Map<string, CompanyInfo>>(
     new Map()
@@ -44,7 +52,8 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
   );
   const [sortBy, setSortBy] = useState<SortTypes>('score-desc');
 
-  useEffect(() => {
+  // ran on mount and again whenever an analysis run finishes
+  function loadJobs() {
     fetchJobs()
       .then((data) => {
         setJobs(data);
@@ -61,6 +70,10 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    loadJobs();
     fetchCompanyInfo()
       .then(setCompanyInfo)
       .catch(() => {});
@@ -210,28 +223,16 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
               {loading ? '—' : `${filtered.length} of ${jobs.length} jobs`}
             </span>
           </div>
-
-          <button
-            className="settings-btn"
-            onClick={onOpenSettings}
-            title="Settings"
-            aria-label="Settings">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            <span className="settings-btn-label">Settings</span>
-          </button>
         </div>
       </header>
 
       <main className="main">
+        <AnalysisPanel
+          settings={settings}
+          hasJobs={jobs.length > 0}
+          onOpenSettings={onOpenSettings}
+          reloadJobs={loadJobs}
+        />
         {loading ? (
           <div className="empty">
             <p>Loading…</p>
@@ -239,7 +240,11 @@ export function Jobs({ onOpenSettings }: { onOpenSettings: () => void }) {
         ) : filtered.length === 0 ? (
           <div className="empty">
             <div className="empty-title">No jobs found</div>
-            <p>Try adjusting your search or filters.</p>
+            <p>
+              {jobs.length > 0
+                ? 'Try adjusting your search or filters.'
+                : 'Run the job analysis to see them here.'}
+            </p>
           </div>
         ) : groupByCompany ? (
           <div className="company-groups">

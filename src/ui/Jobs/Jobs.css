@@ -162,6 +162,11 @@
   transform: rotate(180deg);
 }
 
+/* dimmed backdrop behind the mobile bottom-sheet variant of the panel */
+.dropdown-backdrop {
+  display: none;
+}
+
 .dropdown-panel {
   position: absolute;
   top: calc(100% + 6px);
@@ -602,13 +607,16 @@
   height: 13px;
 }
 
+/* --tip-shift (set inline, default 0) nudges the tooltip horizontally when
+   centering it on the icon would push it past a viewport edge; the arrow
+   counter-shifts to stay anchored on the icon */
 .summary-tooltip {
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
-  transform: translateX(-50%) translateY(2px);
+  transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(2px);
   width: max-content;
-  max-width: 260px;
+  max-width: min(260px, calc(100vw - 24px));
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   background: var(--text-primary);
@@ -635,7 +643,7 @@
   content: '';
   position: absolute;
   top: 100%;
-  left: 50%;
+  left: calc(50% - var(--tip-shift, 0px));
   transform: translateX(-50%);
   border: 5px solid transparent;
   border-top-color: var(--text-primary);
@@ -646,7 +654,7 @@
 .summary-tooltip.below {
   bottom: auto;
   top: calc(100% + 8px);
-  transform: translateX(-50%) translateY(-2px);
+  transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(-2px);
 }
 
 .summary-tooltip.below::after {
@@ -656,11 +664,22 @@
   border-bottom-color: var(--text-primary);
 }
 
-.summary-tip:hover .summary-tooltip,
-.summary-tip:focus-visible .summary-tooltip {
+/* hover-reveal is scoped to devices that actually hover, since mobile
+   browsers emulate a sticky :hover on tap that would fight the tap-toggled
+   `.open` state */
+@media (hover: hover) {
+  .summary-tip:hover .summary-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(0);
+  }
+}
+
+.summary-tip:focus-visible .summary-tooltip,
+.summary-tip.open .summary-tooltip {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(calc(-50% + var(--tip-shift, 0px))) translateY(0);
 }
 
 .job-title {
@@ -832,9 +851,8 @@
     display: none;
   }
 
-  /* Settings stays on the first row with the wordmark, icon-only */
+  /* Settings goes icon-only (lives in the analysis panel header) */
   .settings-btn {
-    margin-left: auto;
     padding: 0 10px;
   }
   .settings-btn-label {
@@ -864,10 +882,62 @@
     display: none;
   }
 
-  /* Prevent dropdown panel from clipping off-screen */
+  /* The company dropdown becomes a bottom sheet: an anchored panel doesn't
+     fit a phone screen, and a sheet gives room for big touch targets */
+  .dropdown-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: oklch(0% 0 0 / 0.32);
+    z-index: 300;
+    animation: fadeIn 0.15s ease;
+  }
+
   .dropdown-panel {
-    left: auto;
+    position: fixed;
+    top: auto;
+    left: 0;
     right: 0;
+    bottom: 0;
+    min-width: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-bottom: none;
+    z-index: 301;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: sheetIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes sheetIn {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .dropdown-header {
+    padding: 14px 16px 10px;
+  }
+
+  .dropdown-items {
+    max-height: 55vh;
+  }
+
+  /* bigger touch targets */
+  .dropdown-item {
+    padding: 11px 16px;
   }
 
   .main {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { type Company } from '../../analysis/companies.ts';
 import { type AnalyzedJob } from '../../analysis/manager.ts';
 import { ScoreRing } from './ScoreRing.tsx';
@@ -27,22 +27,58 @@ export function CompanyFavicon({ slug }: { slug: string }) {
 const TOOLTIP_FLIP_THRESHOLD = 180;
 
 export function SummaryTip({ summary }: { summary: string }) {
+  // hover shows the tooltip on mouse devices (CSS); tapping/clicking pins it
+  // open, which is the only way to reach it on touch screens
+  const [open, setOpen] = useState(false);
   const [openBelow, setOpenBelow] = useState(false);
+  const [shiftPx, setShiftPx] = useState(0);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  // a pinned tooltip dismisses on any tap/click elsewhere (on touch there's
+  // no hover-out to dismiss it naturally)
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: PointerEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    }
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, [open]);
 
   // measured when the tooltip is triggered rather than on scroll, since the
   // position only matters at the moment it becomes visible
-  function measure(e: React.SyntheticEvent<HTMLButtonElement>) {
-    setOpenBelow(
-      e.currentTarget.getBoundingClientRect().top < TOOLTIP_FLIP_THRESHOLD
-    );
+  function measure(el: HTMLButtonElement) {
+    const rect = el.getBoundingClientRect();
+    setOpenBelow(rect.top < TOOLTIP_FLIP_THRESHOLD);
+
+    // shift the tooltip horizontally when centering it on the icon would
+    // push it past a viewport edge (the arrow counter-shifts in CSS to stay
+    // on the icon)
+    const margin = 12;
+    const center = rect.left + rect.width / 2;
+    const half = Math.min(260, window.innerWidth - margin * 2) / 2;
+    let shift = 0;
+    if (center - half < margin) {
+      shift = margin - (center - half);
+    } else if (center + half > window.innerWidth - margin) {
+      shift = window.innerWidth - margin - (center + half);
+    }
+    setShiftPx(shift);
   }
 
   return (
     <button
-      className="summary-tip"
+      ref={ref}
+      className={`summary-tip${open ? ' open' : ''}`}
       aria-label="About this company"
-      onMouseEnter={measure}
-      onFocus={measure}>
+      aria-expanded={open}
+      onMouseEnter={(e) => measure(e.currentTarget)}
+      onFocus={(e) => measure(e.currentTarget)}
+      onClick={(e) => {
+        measure(e.currentTarget);
+        setOpen((o) => !o);
+      }}>
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -56,7 +92,8 @@ export function SummaryTip({ summary }: { summary: string }) {
       </svg>
       <span
         className={`summary-tooltip${openBelow ? ' below' : ''}`}
-        role="tooltip">
+        role="tooltip"
+        style={{ '--tip-shift': `${shiftPx}px` } as React.CSSProperties}>
         {summary}
       </span>
     </button>

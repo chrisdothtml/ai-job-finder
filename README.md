@@ -1,16 +1,18 @@
+![Preview gif showing the analysis phase completing and a jobs list appearing](./.github/assets/preview-banner.gif)
+
 # ai-job-finder
 
 > Let AI browse all those careers listings pages for you, so you can spend your time doing literally anything else
 
-**NOTE**: this is still under development, so everything is subject to change, YMMV, etc. It is usable in its current state, but I'm still doing some fine tuning of the analysis flow to hone in on more reliable and accurate results.
+**NOTE**: this is still under development, so everything is subject to change, YMMV, etc. It is very usable in its current state, but I'm still doing some fine tuning of the analysis flow to hone in on more useful results.
 
-This is an Agentic LLM workflow, paired with scrapers for job postings of popular tech companies, which I'm building so that I can stop manually browsing through every company's unique careers UI.
+## What is it?
 
-The current basic flow is this:
+This is an Agentic LLM workflow, paired with scrapers for job postings of companies, which I'm building so that I can stop manually browsing through every company's unique careers UI.
 
-1. User drops `resume.md` and `job-preferences.md` into the `.data` directory
+The basic flow is this:
 
-2. Use [scrapers](./src/analysis/scraping/) which can reliably fetch all the jobs a given company has available
+1. Use [scrapers](./src/analysis/scraping/) which can reliably fetch all the jobs a given company has available
 
 - Initially I was writing these scrapers manually, but now they're pretty much entirely written by Claude Code via [skills](./.claude/skills/)
 
@@ -18,69 +20,58 @@ The current basic flow is this:
 
 4. Fetch the full info for the remaining jobs and send them through an analysis agent, which generates a fitness score as well as pros/cons based on your preferences
 
-## Running analysis
+## Starting the server
 
-<div align="center">
-  <img width="400" src=".github/assets/analyze-preview.png" alt="Preview of analyzer terminal output">
-</div>
-
-<br/>
-
-Currently, I run this on my gaming PC, which has an RTX 4090, so is very capable of running many open source LLM models locally.
-
-Tools you'll want to install: [Volta](https://volta.sh/), [Ollama](https://ollama.com/)
-
-Once you have Ollama installed, you'll need to fetch the models I currently use in the analysis flow:
-
-```sh
-ollama pull gpt-oss:20b
-```
-
-After you've added the `resume.md` and `job-preferences.md` files into the `.data` directory (there's no real format required for these files, just standard markdown files), you can run the analysis via:
+I would recommend installing [Volta](https://volta.sh/), which will auto-fetch and use the correct version of Node.js and Yarn based on my package.json config.
 
 ```sh
 # install deps
 yarn install
 
-# run analysis
-yarn analyze
-```
-
-When it finishes, it'll spit out the results to `~/.ai-job-finder/jobs.json` (which the UI reads from), containing a list of jobs which are potentially a good fit for you & and their fitness scores, pros/cons, etc.
-
-Since the analysis can take hours to run (depending on how many companies it's running against), I personally `ssh` into a WSL linux instance on my gaming PC, and use `tmux` to create a shell that I start the analysis process in and can check in on later.
-
-### Environment vars
-
-If you want to run this from a separate machine than the one running ollama, you can define `OLLAMA_HOST` in a `.env` file (make sure the machine running ollama has the port exposed inside your network). e.g.
-
-**.env**
-
-```
-OLLAMA_HOST="http://192.168.1.xxx:11434"
-```
-
-## Web UI
-
-<div align="center">
-  <img width="600" src=".github/assets/web-preview.png" alt="Preview of web interface">
-</div>
-
-<br/>
-
-The web UI is early in its development, but after you run the analysis, you can run:
-
-```sh
-yarn dev
-```
-
-OR, for a static production build:
-
-```sh
+# build & start the server
 yarn build && yarn start
+
+# optional PORT var can be used
+PORT=1337 yarn start
 ```
 
-and you'll see your analyzed job list in the browser.
+When you first open it in your browser, you'll need to go through the onboarding flow:
+
+![Onboarding preview gif showing how to go through the steps to fill out your info](./.github/assets/onboarding-preview.gif)
+
+Once you've done that, you can start an analysis run and wait for your jobs to show up!
+
+### How long does analysis take to run?
+
+Depends on how many companies you selected. When I run with Ollama on my gaming PC with all companies selected, it takes many hours; so I just let it run overnight. A single company, however, takes ~6 minutes.
+
+## LLM Providers
+
+**NOTE**: So far, I've primarily tested the analysis process with Ollama. I'm planning, in the near future, to fully vet Claude and ChatGPT against it to ensure my system prompts provide consistent results across providers.
+
+### Ollama
+
+[Ollama](https://ollama.com/) is a wonderful tool for managing and interfacing with **offline LLMs**. I originally started this project with Ollama in mind, as I like the idea of having my PC work for me silently in the background for hours, with no API costs from cloud LLM providers.
+
+I run Ollama on my gaming PC, which has an RTX 4090, and I've found it's very capable for this purpose. I've tested a few different models, but the one I've found to be consistently the best for job analysis is [gpt-oss:20b](https://ollama.com/library/gpt-oss:20b) (which is chosen by default in the onboarding flow).
+
+Whatever model you'd like to use, just make sure to pull it with Ollama before going through the onboarding:
+
+```sh
+ollama pull gpt-oss:20b
+```
+
+### Claude
+
+Claude is [Anthropic's](https://www.anthropic.com/) LLM models, and while I run the job analysis itself offline on my gaming PC, the code in this repo is largely contributed to by Claude Code (shoutout to Fable).
+
+You can get an API key to use with the job analysis at https://console.anthropic.com.
+
+### ChatGPT
+
+Also a very great set of models (and the creator of the `gpt-oss:20b` model I use with Ollama), ChatGPT is [Open AI's](https://openai.com/) LLM models.
+
+You can get an API key to use with the job analysis at https://platform.openai.com.
 
 ## License
 

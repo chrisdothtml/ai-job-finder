@@ -9,6 +9,14 @@ const server = new Koa();
 const PORT = parseInt(getEnv('PORT', '8000'));
 const DEV = getEnv('NODE_ENV') !== 'production';
 
+// an SSE client disconnecting mid-stream (page reload/close while subscribed
+// to /api/analysis/events) surfaces as a premature close on the response
+// pipe; that's routine, not a failure, so keep it out of the error log
+server.on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') return;
+  console.error(error);
+});
+
 // jsonLimit needs headroom for base64-encoded resume uploads (/api/parse-resume)
 server.use(bodyParser({ enableTypes: ['json'], jsonLimit: '15mb' }));
 server.use(api.routes()).use(api.allowedMethods());

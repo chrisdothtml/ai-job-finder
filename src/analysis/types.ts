@@ -97,10 +97,15 @@ export enum AnalysisStateStatus {
   Running = 'RUNNING',
 }
 
+export interface AnalysisMessage {
+  ts: number;
+  text: string;
+}
+
 export interface AnalysisState {
   status: AnalysisStateStatus;
   percent: number;
-  messages: string[];
+  messages: AnalysisMessage[];
   errors: string[];
   startTs: number;
   finishTs: number;
