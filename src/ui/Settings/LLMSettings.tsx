@@ -105,7 +105,7 @@ export function LLMSettings({
   const onKeyBlur = async () => {
     if (!keyDraft) return;
 
-    const result = await postApi<{ output: string }>('/api/encrypt-string', {
+    const result = await postApi<{ output: string }>('api/encrypt-string', {
       input: keyDraft,
     });
     if (result.ok) {
@@ -132,7 +132,7 @@ export function LLMSettings({
       onClick={async () => {
         updateTestBtn({ state: 'running', failure: null, htmlTitle: '' });
 
-        const result = await postApi('/api/verify-llm', config);
+        const result = await postApi('api/verify-llm', config);
         const htmlTitle = 'Click to re-run the validation';
         if (result.ok) {
           updateTestBtn({ state: 'success', htmlTitle });

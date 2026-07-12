@@ -54,7 +54,7 @@ export function AnalysisPanel({
       : Math.min(100, Math.round((state?.percent ?? 0) * 100));
 
   useEffect(() => {
-    const es = new EventSource('/api/analysis/events');
+    const es = new EventSource('api/analysis/events');
     es.onmessage = (e) => setState(JSON.parse(e.data) as AnalysisState);
     return () => es.close();
   }, []);
@@ -72,7 +72,7 @@ export function AnalysisPanel({
   async function clearJobs() {
     if (!confirm('Clear all analyzed jobs? This deletes the jobs file.'))
       return;
-    await postApi('/api/jobs/clear', {});
+    await postApi('api/jobs/clear', {});
     reloadJobs();
   }
 
@@ -118,7 +118,7 @@ export function AnalysisPanel({
           {running ? (
             <button
               className="ap-btn ap-btn-abort"
-              onClick={() => postApi('/api/analysis/abort', {})}>
+              onClick={() => postApi('api/analysis/abort', {})}>
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <rect x="6" y="6" width="12" height="12" rx="2" />
               </svg>
@@ -128,7 +128,7 @@ export function AnalysisPanel({
             <button
               className="ap-btn ap-btn-run"
               disabled={state === null}
-              onClick={() => postApi('/api/analysis/start', { settings })}>
+              onClick={() => postApi('api/analysis/start', { settings })}>
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5.14v13.72c0 .81.87 1.31 1.57.9l11.05-6.86a1.05 1.05 0 0 0 0-1.8L9.57 4.24A1.05 1.05 0 0 0 8 5.14z" />
               </svg>
@@ -208,7 +208,7 @@ export function AnalysisPanel({
 
           {hasJobs && (
             <div className="ap-jobs-actions">
-              <a className="ap-link" href="/api/jobs" download="jobs.json">
+              <a className="ap-link" href="api/jobs" download="jobs.json">
                 Download jobs
               </a>
               {/* a running analysis would immediately rewrite the file */}

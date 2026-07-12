@@ -7,6 +7,7 @@ import { api } from './middleware/api.ts';
 
 const server = new Koa();
 const PORT = parseInt(getEnv('PORT', '8000'));
+const HOST = getEnv('HOST', 'localhost');
 const DEV = getEnv('NODE_ENV') !== 'production';
 
 // an SSE client disconnecting mid-stream (page reload/close while subscribed
@@ -42,6 +43,6 @@ if (DEV) {
   server.use(serve(publicDir));
 }
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`Server running at http://${HOST}:${PORT}`);
 });

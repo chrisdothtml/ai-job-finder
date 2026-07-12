@@ -107,7 +107,7 @@ async function parseResumePdf(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 
-  const res = await fetch('/api/parse-resume', {
+  const res = await fetch('api/parse-resume', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fileName: file.name, base64 }),
@@ -136,14 +136,14 @@ export function ProfileSettings({
     const { baseUrl, model } = config;
     const payload = { host: baseUrl, model };
 
-    fetch('/api/ollama/load-model', {
+    fetch('api/ollama/load-model', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }).catch(() => {});
 
     return () => {
-      fetch('/api/ollama/unload-model', {
+      fetch('api/ollama/unload-model', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -208,7 +208,7 @@ export function ProfileSettings({
         });
 
         const result = await postApi<{ summary: string }>(
-          '/api/generate-resume-summary',
+          'api/generate-resume-summary',
           { config, userInfo: baseUserInfo }
         );
 

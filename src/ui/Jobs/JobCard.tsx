@@ -13,7 +13,7 @@ export function CompanyFavicon({ slug }: { slug: string }) {
   return (
     <img
       className="company-favicon"
-      src={`/api/company-favicon/${slug}`}
+      src={`api/company-favicon/${slug}`}
       alt=""
       loading="lazy"
       onError={() => setFailed(true)}

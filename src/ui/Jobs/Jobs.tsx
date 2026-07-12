@@ -11,12 +11,12 @@ import './Jobs.css';
 import { Logo } from './Logo.tsx';
 
 async function fetchJobs(): Promise<AnalyzedJob[]> {
-  return fetch('/api/jobs').then((r) => r.json()) as Promise<AnalyzedJob[]>;
+  return fetch('api/jobs').then((r) => r.json()) as Promise<AnalyzedJob[]>;
 }
 
 // keyed by company display name, since jobs only carry `companyName`
 async function fetchCompanyInfo(): Promise<Map<string, CompanyInfo>> {
-  const data = (await fetch('/api/companies').then((r) => r.json())) as Record<
+  const data = (await fetch('api/companies').then((r) => r.json())) as Record<
     string,
     Company
   >;
