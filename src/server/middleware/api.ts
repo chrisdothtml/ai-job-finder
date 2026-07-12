@@ -29,6 +29,10 @@ import { tokenEncryptor } from '../utils.ts';
 
 export const api = new Router();
 
+api.get('/ping', (ctx) => {
+  ctx.body = 'pong';
+});
+
 // encrypts a sensitive value (i.e. an api key) so the ui never has to
 // store/send it in plaintext; responds with `{ ok: true, output: string }`
 api.post('/api/encrypt-string', async (ctx) => {
