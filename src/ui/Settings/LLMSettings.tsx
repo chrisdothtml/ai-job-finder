@@ -208,7 +208,7 @@ export function LLMSettings({
             type="password"
             // stops chrome from offering to save/autofill the key
             autoComplete="new-password"
-            hint={apiKeyHint('Find your key at console.anthropic.com')}
+            hint={apiKeyHint('Find your key at platform.claude.com')}
             placeholder="sk-ant-api03-..."
             value={keyDraft ?? config.apiKey ?? ''}
             onChange={onKeyChange}

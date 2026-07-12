@@ -1,7 +1,6 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { dataDir, repoRootDir } from '../constants.ts';
-import { getEnv, pathExists } from '../utils/node.ts';
+import { getEnv, readIfExists } from '../utils/node.ts';
 import { getGeoLocation } from '../utils/shared.ts';
 import { Spinner } from '../utils/Spinner.ts';
 import { Analyzer } from './Analyzer.ts';
@@ -103,12 +102,4 @@ async function createSettings(): Promise<AnalyzerSettings> {
     },
     companiesList: Object.keys(companies),
   };
-}
-
-async function readIfExists(filePath: string) {
-  if (await pathExists(filePath)) {
-    return fs.readFile(filePath, 'utf-8');
-  } else {
-    return '';
-  }
 }

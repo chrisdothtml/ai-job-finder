@@ -1,0 +1,21 @@
+###
+# Server vars
+###
+
+# optional; change the host the server binds to
+HOST="0.0.0.0"
+# optional; change the port the server binds to
+PORT="1337"
+
+###
+# LLM config vars
+# (currently only used when running various scripts in this repo)
+###
+
+# optional; set this if you're running Ollama on a different machine
+# than the job finder server is running on
+OLLAMA_HOST="http://1.2.3.4:11434"
+# Generate one at https://platform.openai.com
+CHATGPT_TOKEN="sk-proj-..."
+# Generate one at https://platform.claude.com
+CLAUDE_TOKEN="sk-ant-..."

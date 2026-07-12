@@ -45,7 +45,7 @@ export class Analyzer {
       ## Responsibility
       The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that. **IMPORTANT** Also note that if the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states that they're open to travel or move for a job, ASSUME THEY ARE NOT OPEN TO THAT.
     `),
-    reduceJobs: dedent(`
+    potentialJobFit: dedent(`
       # Purpose
       You are being used to reduce a list of job postings down to those that the user may actually be a good fit for, in terms of role match (based on preferences and past experience) and location preferences/restrictions.
 
@@ -128,6 +128,15 @@ export class Analyzer {
     }
   }
 
+  /**
+   * Unload the analysis model (if llm is Ollama)
+   */
+  async unloadModel() {
+    if (this.llm instanceof Ollama) {
+      await this.llm.unloadModel(this.settings.config.model);
+    }
+  }
+
   async generateResumeSummary(): Promise<string> {
     const { config, userInfo } = this.settings;
     const sysPrompt = [
@@ -167,7 +176,7 @@ export class Analyzer {
   async jobIsPotentialFit(job: ListedJob): Promise<boolean> {
     const { config } = this.settings;
     const sysPrompt = [
-      Analyzer.prompts.reduceJobs,
+      Analyzer.prompts.potentialJobFit,
       this.userInfoPrompt,
       this.userResumeSummaryPrompt,
     ].join('\n\n');

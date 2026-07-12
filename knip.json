@@ -3,6 +3,7 @@
   "entry": [
     "src/{server,ui}/index.ts!",
     "src/analysis/analyze.ts",
+    "src/analysis/compare-models.ts",
     "src/**/*.test.ts"
   ],
   "project": ["src/**/*.{ts,tsx}"],
