@@ -24,7 +24,11 @@ import {
   readIfExists,
 } from '../utils/node.ts';
 import { dedent, getGeoLocation } from '../utils/shared.ts';
-import { Analyzer, type JobFitResponse } from './Analyzer.ts';
+import {
+  Analyzer,
+  type JobFitResponse,
+  type JobLocationInfo,
+} from './Analyzer.ts';
 import { companies, getScraper } from './companies.ts';
 import { type ListedJob } from './scraping/Scraper.ts';
 import { type Config, type UserInfo } from './types.ts';
@@ -76,7 +80,7 @@ async function main() {
     {
       modelProvider: 'chatgpt',
       apiKey: getEnvStrict('CHATGPT_TOKEN'),
-      model: 'gpt-4.1-mini',
+      model: 'gpt-5.4',
     },
     {
       modelProvider: 'claude',
@@ -165,9 +169,15 @@ export async function generateReport(
         runSilently
       );
 
+      const [locationInfo, locationDur, locationErr] = await timedTask(
+        `Resolving job location`,
+        () => analyzer.resolveJobLocation(job),
+        runSilently
+      );
+
       const [analysis, analysisDur, analysisErr] = await timedTask(
         `Generating job analysis`,
-        () => analyzer.analyzeJob(job.content),
+        () => analyzer.analyzeJob(job.content, locationInfo),
         runSilently
       );
 
@@ -175,10 +185,16 @@ export async function generateReport(
         companySlug: job.companySlug,
         id: job.id,
         note: job.note,
+        listedLocation: job.location,
         potentialFit: {
           durationMs: potFitDur,
           result: potFit,
           error: potFitErr,
+        },
+        location: {
+          durationMs: locationDur,
+          result: locationInfo,
+          error: locationErr,
         },
         analysis: {
           durationMs: analysisDur,
@@ -229,6 +245,8 @@ function renderReportEntry(entry: ReportEntry): string {
         // make durations readable
         json.potentialFit.duration = formatMsDuration(potentialFit.durationMs);
         delete json.potentialFit.durationMs;
+        json.location.duration = formatMsDuration(job.location.durationMs);
+        delete json.location.durationMs;
         json.analysis.duration = formatMsDuration(analysis.durationMs);
         delete json.analysis.durationMs;
 
@@ -353,9 +371,16 @@ type ResolvedTestJob = TestJob &
   };
 
 type ReportJob = TestJob & {
+  /** the raw location string from the job listing */
+  listedLocation: string;
   potentialFit: {
     durationMs: number;
     result: boolean | null;
+    error: string | null;
+  };
+  location: {
+    durationMs: number;
+    result: JobLocationInfo | null;
     error: string | null;
   };
   analysis: {

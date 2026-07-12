@@ -4,8 +4,6 @@
 
 > Let AI browse all those careers listings pages for you, so you can spend your time doing literally anything else
 
-**NOTE**: this is still under development, so everything is subject to change, YMMV, etc. It is very usable in its current state, but I'm still doing some fine tuning of the analysis flow to hone in on more useful results.
-
 ## What is it?
 
 This is an Agentic LLM workflow, paired with scrapers for job postings of companies, which I'm building so that I can stop manually browsing through every company's unique careers UI.
@@ -48,8 +46,6 @@ Depends on how many companies you selected. When I run with Ollama on my gaming 
 ![Preview gif showing the analysis phase completing and a jobs list appearing](./.github/assets/preview-banner.gif)
 
 ## LLM Providers
-
-**NOTE**: So far, I've primarily tested the analysis process with Ollama. I'm planning, in the near future, to fully vet Claude and ChatGPT against it to ensure my system prompts provide consistent results across providers.
 
 ### Ollama
 

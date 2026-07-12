@@ -1,6 +1,7 @@
 import { type LLM } from '../LLMs/_LLM.ts';
 import { Ollama } from '../LLMs/Ollama.ts';
 import { resolveLLM } from '../LLMs/resolveLLM.ts';
+import { geocode, haversineMiles, type GeocodedPlace } from '../utils/geo.ts';
 import { dedent } from '../utils/shared.ts';
 import { type ListedJob } from './scraping/Scraper.ts';
 import { type AnalyzerSettings, type UserInfo } from './types.ts';
@@ -9,6 +10,14 @@ export interface JobFitResponse {
   fitScore: number;
   pros: string;
   cons: string;
+}
+
+export interface JobLocationInfo {
+  /** normalized location, e.g. "Foster City, California, US" or "Remote, US" */
+  location: string;
+  isRemote: boolean;
+  /** straight-line miles from the user's home; null when remote/unknown or geocoding failed */
+  distanceMiles: number | null;
 }
 
 export class Analyzer {
@@ -28,22 +37,75 @@ export class Analyzer {
       }
       \`\`\`
 
-      Reasoning should be kept very brief and not overly wordy; the user will be viewing your assessment in a list of many analyzed jobs, so they should be able to quickly breeze past your reasoning for each job; keep it short and to-the-point. Also, word your reasoning as if you're talking to the user; don't talk about them in the third person. Here are some example responses:
+      Rules for \`pros\`/\`cons\` (the user will be scanning your assessment in a list of MANY analyzed jobs, so brevity is critical):
+      - Each must be at most 2 short sentences (roughly 30 words total). Never exceed this.
+      - Only mention the few factors that most affect the decision (role match, location/commute, explicit user preferences). Do NOT enumerate every matching skill or restate the resume/posting.
+      - Word it as if you're talking to the user; don't talk about them in the third person.
+      - No filler or hedging (e.g. "but that's acceptable", "otherwise no major drawbacks"); if there's nothing meaningful to say, use an empty string.
+
+      Example responses:
 
       \`\`\`json
-      { "fitScore": 1, "pros": "Job is remote, matches your experience in infrastructure engineering, matches your preference for a large company", "cons": "" }
+      { "fitScore": 1, "pros": "Remote, and a strong match for your infrastructure engineering experience", "cons": "" }
       \`\`\`
 
       \`\`\`json
-      { "fitScore": 0.25, "pros": "Job is a good match for your experience", "cons": "Job is fully on-site, which you've explicitly stated you aren't interested in" }
+      { "fitScore": 0.4, "pros": "Strong match for your platform engineering background", "cons": "Hybrid 3 days/week in Sunnyvale, ~30 mi from you and outside your preferred commute areas" }
       \`\`\`
 
       \`\`\`json
-      { "fitScore": 0, "pros": "", "cons": "Job is based outside of the user's country" }
+      { "fitScore": 0.25, "pros": "Good match for your experience", "cons": "Fully on-site, which you've explicitly stated you aren't interested in" }
       \`\`\`
 
-      ## Responsibility
-      The user is trusting you to process their info and the info of a job from their persective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict with your fitness score, don't try to imagine a scenario where a job might be a fit for them. If it's not a fit, it's not a fit; and your fitness score should reflect that. **IMPORTANT** Also note that if the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states that they're open to travel or move for a job, ASSUME THEY ARE NOT OPEN TO THAT.
+      \`\`\`json
+      { "fitScore": 0, "pros": "", "cons": "Based outside of your country" }
+      \`\`\`
+
+      ## Location & commute
+      The user message may include a pre-computed "Job location" section containing the job's closest listed location to the user and its real straight-line distance from the user's home. Treat that data as ground truth; NEVER guess at proximity or describe a location as "near" the user without checking the distance. That data is derived from the job's listing though, so if the full posting explicitly contradicts it (e.g. states the role can be remote), the posting wins.
+
+      For hybrid/in-office roles, judge the commute using the user's stated location preferences FIRST, and only then the distance: if they name specific acceptable cities/areas for on-site work, interpret that strictly. The job must be in one of those cities or immediately adjacent; a job in any other city is a location mismatch (cap fitScore at 0.5) even when the distance seems small. Do NOT use the distance to override this (e.g. if the user says hybrid near Oakland or San Francisco is okay, a hybrid job in Foster City is still a location mismatch, even at ~14 miles away). Only when their preferences don't name areas, use distance alone: assume anything over ~30 miles is an impractical regular commute. Keep in mind that straight-line distance understates real commutes (bridges, water crossings, traffic).
+
+      When commute affects your assessment, cite the actual city and distance (e.g. "Foster City, ~14 mi from you"); NEVER use vague proximity phrases like "near you" or "near <city>".
+
+      ## Scoring
+      The user is trusting you to process their info and the info of a job from their perspective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict; don't try to imagine a scenario where a job might work out. If the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states they're open to travel or move for a job, ASSUME THEY ARE NOT.
+
+      Calibrate fitScore like this:
+      - 0.9-1.0: strong role match AND the location works (remote, or comfortably within the user's commute preferences)
+      - 0.6-0.8: good role match with minor concerns
+      - 0.3-0.5: good role match but impractical location/commute, or workable location but a mediocre role match
+      - 0.0-0.2: a role type the user excluded, or a location that isn't viable at all (e.g. different country, no remote option)
+
+      A role type the user explicitly excluded (e.g. management, or a domain they said they're not a fit for) caps the score at 0.5 no matter how well the skills match; likewise, an impractical location caps the score at 0.5 no matter how good the role match is. Don't rationalize a weak match into a fit: if the posting's primary emphasis is on work the user said they're weak in or not seeking, that's a mediocre role match (0.3-0.5) even when many of their skills overlap. When a posting spans multiple possible teams or areas (e.g. "team placement occurs after the interview process"), judge fit by the posting's overall emphasis, not by the single best-case team the user could land on.
+    `),
+    resolveJobLocation: dedent(`
+      # Purpose
+      You are given the location (or list of locations) attached to a single job listing. Determine the one listed location that is closest to the user (their location is listed below) and respond with it in a normalized format.
+
+      ## Output format
+      Respond with ONLY the normalized location; no explanation, quotes, or extra punctuation. Use exactly one of these formats:
+      1. "<city>, <region>, <country code>" (e.g. "San Francisco, California, US"): the listed location closest to the user
+      2. "Remote, <country code>" (e.g. "Remote, US"): the listing is remote; if it offers both remote and physical locations, treat it as remote
+      3. "Unknown": no city can be determined (e.g. the listing only says "United States")
+
+      Expand abbreviations (e.g. "SF" becomes "San Francisco", "CA" becomes "California"). For metro areas (e.g. "SF Bay Area"), use the principal city.
+
+      ### Examples (for a user located in Oakland, California, US)
+      **Input**: Foster City, CA
+      **Output**: Foster City, California, US
+
+      **Input**: Remote - United States
+      **Output**: Remote, US
+
+      **Input**: San Francisco, CA | New York, NY | Seattle, WA
+      **Output**: San Francisco, California, US
+
+      **Input**: NYC or Remote (US)
+      **Output**: Remote, US
+
+      **Input**: United States
+      **Output**: Unknown
     `),
     potentialJobFit: dedent(`
       # Purpose
@@ -102,21 +164,33 @@ export class Analyzer {
       Your job is to analyze the user's provided resume and reduce their work experience down to a brief summary of their work experience. This should be short (maximum paragraph), but should encompass all their past experience, technologies, and work types.
 
       The context is that your summary will be used as a first-pass to reduce a list of many available job titles, to those that match the user's past experience. You can take their job preferences into account to put emphasis on past experience relevant to their job search.
+
+      ## Output format
+      Respond with ONLY the summary: a single paragraph of plain sentences, at most ~150 words. No headings, bullet points, bold text, or any other markdown formatting, and no preamble like "Here's a summary of...".
+
+      Write the summary in the first person, as if you are the user describing your own work experience (e.g. "I'm a senior software engineer with 10 years of experience building...").
     `),
   };
 
   private llm: LLM;
   private userInfoPrompt: string;
+  private userLocationPrompt: string;
   private userResumePrompt: string;
   private userResumeSummaryPrompt: string;
+  /** memoized geocode of the user's home location */
+  private userPlacePromise: Promise<GeocodedPlace | null> | null = null;
 
   constructor(
     private settings: AnalyzerSettings,
     signal: AbortSignal
   ) {
     this.llm = resolveLLM(settings.config, signal);
-    [this.userInfoPrompt, this.userResumePrompt, this.userResumeSummaryPrompt] =
-      this.generateUserPrompts(settings.userInfo);
+    [
+      this.userInfoPrompt,
+      this.userLocationPrompt,
+      this.userResumePrompt,
+      this.userResumeSummaryPrompt,
+    ] = this.generateUserPrompts(settings.userInfo);
   }
 
   /**
@@ -150,11 +224,14 @@ export class Analyzer {
     ]);
 
     userInfo.resumeSummary = response;
-    [, , this.userResumeSummaryPrompt] = this.generateUserPrompts(userInfo);
+    [, , , this.userResumeSummaryPrompt] = this.generateUserPrompts(userInfo);
     return response;
   }
 
-  async analyzeJob(jobMarkdown: string): Promise<JobFitResponse> {
+  async analyzeJob(
+    jobMarkdown: string,
+    locationInfo?: JobLocationInfo | null
+  ): Promise<JobFitResponse> {
     const { config } = this.settings;
     const sysPrompt = [
       Analyzer.prompts.analyzeJob,
@@ -162,15 +239,92 @@ export class Analyzer {
       this.userResumePrompt,
     ].join('\n\n');
 
+    let userContent = jobMarkdown;
+    if (locationInfo && !/^unknown$/i.test(locationInfo.location)) {
+      const lines = [`# Job location (pre-computed)`];
+      if (locationInfo.isRemote) {
+        lines.push(`This job is remote (${locationInfo.location})`);
+      } else {
+        lines.push(
+          `Closest listed location to the user: ${locationInfo.location}`
+        );
+        if (locationInfo.distanceMiles !== null) {
+          lines.push(
+            `Straight-line distance from the user's home: ~${locationInfo.distanceMiles} miles (driving distance will be longer)`
+          );
+        }
+        lines.push(
+          dedent(`
+            REMINDER: if this job requires any on-site presence and the user's preferences name specific acceptable on-site cities/areas, this job's city must be one of them; if it isn't, that's a location mismatch (fitScore capped at 0.5) REGARDLESS of how small the distance is.
+          `)
+        );
+      }
+      userContent += '\n\n' + lines.join('\n');
+    }
+
     const [response] = await this.llm.chat(
       config.model,
       [
         { role: 'system', content: sysPrompt },
-        { role: 'user', content: jobMarkdown },
+        { role: 'user', content: userContent },
       ],
       'json'
     );
     return response as Promise<JobFitResponse>;
+  }
+
+  /**
+   * Resolves a job's listed location to the single normalized location
+   * closest to the user (via a small LLM prompt), then geocodes it to
+   * compute the real distance from the user's home
+   */
+  async resolveJobLocation(job: ListedJob): Promise<JobLocationInfo> {
+    const { config } = this.settings;
+    const sysPrompt = [
+      Analyzer.prompts.resolveJobLocation,
+      this.userLocationPrompt,
+    ].join('\n\n');
+
+    const [response] = await this.llm.chat(config.model, [
+      { role: 'system', content: sysPrompt },
+      { role: 'user', content: job.location },
+    ]);
+
+    const location = (response as string)
+      .trim()
+      .replace(/^["'`]+|["'`.]+$/g, '');
+    const isRemote = /^remote\b/i.test(location);
+    const isUnknown = /^unknown\b/i.test(location);
+
+    let distanceMiles: number | null = null;
+    if (!isRemote && !isUnknown) {
+      this.userPlacePromise ??= this.geocodeUserLocation();
+      const [userPlace, jobPlace] = await Promise.all([
+        this.userPlacePromise,
+        geocode(location).catch(() => null),
+      ]);
+
+      if (userPlace && jobPlace) {
+        distanceMiles = Math.max(
+          1,
+          Math.round(haversineMiles(userPlace, jobPlace))
+        );
+      }
+    }
+
+    return { location, isRemote, distanceMiles };
+  }
+
+  /**
+   * Geocode the user's location from their geo info's place names
+   * (rather than trusting its lat/lon, which the user may want to
+   * override, e.g. when on a VPN or planning to move)
+   */
+  private geocodeUserLocation(): Promise<GeocodedPlace | null> {
+    const { geo } = this.settings.userInfo;
+    return geocode(`${geo.city}, ${geo.region}, ${geo.country}`).catch(
+      () => null
+    );
   }
 
   async jobIsPotentialFit(job: ListedJob): Promise<boolean> {
@@ -216,9 +370,17 @@ export class Analyzer {
     geo,
   }: UserInfo): [
     infoPrompt: string,
+    locationPrompt: string,
     resumePrompt: string,
     resumeSummaryPrompt: string,
   ] {
+    const locationPrompt = dedent(`
+      # User location
+      Country: ${geo.country}
+      Region: ${geo.region}
+      City: ${geo.city}
+    `);
+
     let infoPrompt = dedent(`
       # User information
 
@@ -243,6 +405,6 @@ export class Analyzer {
     resumeSummaryPrompt += resumeSummary;
     resumeSummaryPrompt += `\n\`\`\`\``;
 
-    return [infoPrompt, resumePrompt, resumeSummaryPrompt];
+    return [infoPrompt, locationPrompt, resumePrompt, resumeSummaryPrompt];
   }
 }

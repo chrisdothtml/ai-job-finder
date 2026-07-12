@@ -59,7 +59,7 @@ const defaults: { [p in ModelProvider]: PartialConfig } = {
     model: 'claude-sonnet-4-5',
   },
   chatgpt: {
-    model: 'gpt-4.1-mini',
+    model: 'gpt-5.4',
   },
 };
 

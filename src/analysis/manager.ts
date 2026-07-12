@@ -13,6 +13,10 @@ import {
 export type AnalyzedJob = ListedJob &
   JobFitResponse & {
     companyName: string;
+    /** normalized closest location, e.g. "Foster City, California, US" or "Remote, US" */
+    resolvedLocation?: string;
+    /** straight-line miles from the user's home; null when remote/unknown */
+    distanceMiles?: number | null;
   };
 
 export enum ManagerEvent {
@@ -231,10 +235,28 @@ export class Manager {
       for (let i = 0; i < jobsListLen; i++) {
         const job = jobsList[i];
         try {
-          const analysis = await analyzer.analyzeJob(job.content);
+          // a failed location resolution shouldn't sink the analysis; it
+          // just runs without the pre-computed location/distance info
+          const locationInfo = await analyzer
+            .resolveJobLocation(job)
+            .catch((error) => {
+              signal.throwIfAborted();
+              this.addError(error);
+              return null;
+            });
+
+          const analysis = await analyzer.analyzeJob(job.content, locationInfo);
           // @ts-expect-error
           delete job.content;
-          analyzedJobs.push({ ...job, ...analysis, companyName: company.name });
+          analyzedJobs.push({
+            ...job,
+            ...analysis,
+            companyName: company.name,
+            ...(locationInfo && {
+              resolvedLocation: locationInfo.location,
+              distanceMiles: locationInfo.distanceMiles,
+            }),
+          });
           await fs.writeFile(jobsFile, JSON.stringify(analyzedJobs, null, 2));
         } catch (error) {
           signal.throwIfAborted();
