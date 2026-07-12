@@ -7,6 +7,12 @@ import { type ListedJob } from './scraping/Scraper.ts';
 import { type AnalyzerSettings, type UserInfo } from './types.ts';
 
 export interface JobFitResponse {
+  /** the stated user preference this job violates, or null (optional: older analyses predate it) */
+  preferenceConflict?: string | null;
+  /** optional: older analyses predate it */
+  roleMatch?: 'strong' | 'good' | 'partial' | 'poor';
+  /** optional: older analyses predate it */
+  locationFit?: 'works' | 'impractical';
   fitScore: number;
   pros: string;
   cons: string;
@@ -27,13 +33,33 @@ export class Analyzer {
       Your job is to determine whether a given job posting is a good fit for the user, based on their location, resume, and job preferences listed below.
 
       ## Output format
-      You should output using JSON format, using ONLY this schema:
+      You should output using JSON format, using ONLY this schema, with the fields in EXACTLY this order (each field builds on the ones before it):
       \`\`\`typescript
       interface JobFitResponse {
-        // number between 0-1; e.g. 0, 0.1, ..., 0.9, 1.0
-        fitScore: number;
+        // Does this posting conflict with any of the user's explicitly stated job
+        // preferences (e.g. a role type or domain they said they're not a fit for,
+        // management when they want IC roles)? Check EVERY stated preference against
+        // the posting's PRIMARY emphasis. Quote/paraphrase the single violated
+        // preference here, or null if none. Only count a conflict the user EXPLICITLY
+        // stated. NOTE: mentoring, code review, or technical-leadership expectations
+        // are a normal part of senior IC roles, NOT management; only treat a role as
+        // management if its primary function is managing people.
+        preferenceConflict: string | null;
+        // How well the posting's PRIMARY emphasis matches the user's past experience
+        // and interests: "strong" | "good" | "partial" | "poor". Be strict: if the
+        // posting's PRIMARY emphasis is work the user is weak in or not seeking,
+        // that's "partial" at best, even when many of their skills overlap. But a
+        // role that IS the kind of work they're seeking, with a skill gap in one
+        // required area, is "good", not "partial".
+        roleMatch: "strong" | "good" | "partial" | "poor";
+        // "works": remote, or within the user's stated on-site/commute preferences
+        // "impractical": requires on-site presence somewhere they can't regularly commute
+        locationFit: "works" | "impractical";
         pros: string;
         cons: string;
+        // number between 0-1 (e.g. 0, 0.1, ..., 0.9, 1.0), derived MECHANICALLY from
+        // the three assessments above via the Scoring rules; never contradict them
+        fitScore: number;
       }
       \`\`\`
 
@@ -46,38 +72,38 @@ export class Analyzer {
       Example responses:
 
       \`\`\`json
-      { "fitScore": 1, "pros": "Remote, and a strong match for your infrastructure engineering experience", "cons": "" }
+      { "preferenceConflict": null, "roleMatch": "strong", "locationFit": "works", "pros": "Remote, and a strong match for your infrastructure engineering experience", "cons": "", "fitScore": 1 }
       \`\`\`
 
       \`\`\`json
-      { "fitScore": 0.4, "pros": "Strong match for your platform engineering background", "cons": "Hybrid 3 days/week in Sunnyvale, ~30 mi from you and outside your preferred commute areas" }
+      { "preferenceConflict": null, "roleMatch": "strong", "locationFit": "impractical", "pros": "Strong match for your platform engineering background", "cons": "Hybrid 3 days/week in Sunnyvale, ~30 mi from you and outside your preferred commute areas", "fitScore": 0.4 }
       \`\`\`
 
       \`\`\`json
-      { "fitScore": 0.25, "pros": "Good match for your experience", "cons": "Fully on-site, which you've explicitly stated you aren't interested in" }
+      { "preferenceConflict": "you've said you're not a fit for strictly backend roles", "roleMatch": "partial", "locationFit": "works", "pros": "Remote", "cons": "Primarily a distributed-systems backend role, which you've said isn't your strength", "fitScore": 0.3 }
       \`\`\`
 
       \`\`\`json
-      { "fitScore": 0, "pros": "", "cons": "Based outside of your country" }
+      { "preferenceConflict": null, "roleMatch": "good", "locationFit": "works", "pros": "Remote, and developer-tooling work that matches your interests", "cons": "Heavy emphasis on mobile development, which your resume doesn't demonstrate", "fitScore": 0.65 }
+      \`\`\`
+
+      \`\`\`json
+      { "preferenceConflict": null, "roleMatch": "poor", "locationFit": "impractical", "pros": "", "cons": "Based outside of your country", "fitScore": 0 }
       \`\`\`
 
       ## Location & commute
       The user message may include a pre-computed "Job location" section containing the job's closest listed location to the user and its real straight-line distance from the user's home. Treat that data as ground truth; NEVER guess at proximity or describe a location as "near" the user without checking the distance. That data is derived from the job's listing though, so if the full posting explicitly contradicts it (e.g. states the role can be remote), the posting wins.
 
-      For hybrid/in-office roles, judge the commute using the user's stated location preferences FIRST, and only then the distance: if they name specific acceptable cities/areas for on-site work, interpret that strictly. The job must be in one of those cities or immediately adjacent; a job in any other city is a location mismatch (cap fitScore at 0.5) even when the distance seems small. Do NOT use the distance to override this (e.g. if the user says hybrid near Oakland or San Francisco is okay, a hybrid job in Foster City is still a location mismatch, even at ~14 miles away). Only when their preferences don't name areas, use distance alone: assume anything over ~30 miles is an impractical regular commute. Keep in mind that straight-line distance understates real commutes (bridges, water crossings, traffic).
+      For hybrid/in-office roles, judge \`locationFit\` using the user's stated location preferences FIRST, and only then the distance: if they name specific acceptable cities/areas for on-site work, interpret that strictly. The job must be in one of those cities or immediately adjacent; a job in any other city is "impractical" even when the distance seems small. Do NOT use the distance to override this (e.g. if the user says hybrid near Oakland or San Francisco is okay, a hybrid job in Foster City is still "impractical", even at ~14 miles away). Only when their preferences don't name areas, use distance alone: assume anything over ~30 miles is an impractical regular commute. Keep in mind that straight-line distance understates real commutes (bridges, water crossings, traffic).
 
       When commute affects your assessment, cite the actual city and distance (e.g. "Foster City, ~14 mi from you"); NEVER use vague proximity phrases like "near you" or "near <city>".
 
       ## Scoring
-      The user is trusting you to process their info and the info of a job from their perspective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict; don't try to imagine a scenario where a job might work out. If the location doesn't match the user's location, it's likely not a good fit (unless it's fully remote); unless the user explicitly states they're open to travel or move for a job, ASSUME THEY ARE NOT.
+      The user is trusting you to process their info and the info of a job from their perspective. Imagine you are the user and use that to determine whether you would want to do the job they provide. Be strict; don't try to imagine a scenario where a job might work out. Unless the user explicitly states they're open to travel or move for a job, ASSUME THEY ARE NOT. When a posting spans multiple possible teams or areas (e.g. "team placement occurs after the interview process"), judge \`roleMatch\` by the posting's overall emphasis, not by the single best-case team the user could land on.
 
-      Calibrate fitScore like this:
-      - 0.9-1.0: strong role match AND the location works (remote, or comfortably within the user's commute preferences)
-      - 0.6-0.8: good role match with minor concerns
-      - 0.3-0.5: good role match but impractical location/commute, or workable location but a mediocre role match
-      - 0.0-0.2: a role type the user excluded, or a location that isn't viable at all (e.g. different country, no remote option)
-
-      A role type the user explicitly excluded (e.g. management, or a domain they said they're not a fit for) caps the score at 0.5 no matter how well the skills match; likewise, an impractical location caps the score at 0.5 no matter how good the role match is. Don't rationalize a weak match into a fit: if the posting's primary emphasis is on work the user said they're weak in or not seeking, that's a mediocre role match (0.3-0.5) even when many of their skills overlap. When a posting spans multiple possible teams or areas (e.g. "team placement occurs after the interview process"), judge fit by the posting's overall emphasis, not by the single best-case team the user could land on.
+      Derive \`fitScore\` from the three assessments like this:
+      1. \`preferenceConflict\` is non-null OR \`locationFit\` is "impractical": the score is CAPPED at 0.5 no matter how strong the role match is. Use 0.3-0.5 when \`roleMatch\` is "strong"/"good", and 0.0-0.2 when \`roleMatch\` is "partial"/"poor" or the location isn't viable at all (e.g. different country with no remote option).
+      2. Otherwise, map \`roleMatch\`: "strong" → 0.9-1.0, "good" → 0.6-0.8, "partial" → 0.3-0.5, "poor" → 0.0-0.2.
     `),
     resolveJobLocation: dedent(`
       # Purpose
@@ -255,7 +281,7 @@ export class Analyzer {
         }
         lines.push(
           dedent(`
-            REMINDER: if this job requires any on-site presence and the user's preferences name specific acceptable on-site cities/areas, this job's city must be one of them; if it isn't, that's a location mismatch (fitScore capped at 0.5) REGARDLESS of how small the distance is.
+            REMINDER: if this job requires any on-site presence and the user's preferences name specific acceptable on-site cities/areas, this job's city must be one of them; if it isn't, locationFit is "impractical" (fitScore capped at 0.5) REGARDLESS of how small the distance is.
           `)
         );
       }

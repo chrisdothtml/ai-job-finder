@@ -57,7 +57,7 @@ export class Ollama extends LLM {
   static defaultHost = 'http://localhost:11434';
   /** built-in recommended settings for models */
   static modelPresets: { [model: string]: OllamaParams } = {
-    base: { temperature: 0.1, num_ctx: 2e4 },
+    base: { temperature: LLM.defaultParams.temperature, num_ctx: 2e4 },
     'gemma4:e4b': { top_p: 0.95, top_k: 64 },
   } as const;
 

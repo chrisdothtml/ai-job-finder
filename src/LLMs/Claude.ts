@@ -4,9 +4,6 @@ import { LLM, type ChatMessage, type ChatResponse } from './_LLM.ts';
 export class Claude extends LLM {
   protected readonly providerName = 'Claude';
 
-  // FIXME: make `maxTokens` a param of `chat` (need to update Ollama to include that in params; should make a standard `LLM` params interface that all the providers propagate)
-  static defaultMaxTokens = 4096;
-
   private baseUrl = 'https://api.anthropic.com/v1';
   private headers: Record<string, string>;
 
@@ -63,7 +60,9 @@ export class Claude extends LLM {
 
     const body: Record<string, unknown> = {
       model,
-      max_tokens: Claude.defaultMaxTokens,
+      // the messages API requires an explicit max_tokens (see ChatParams)
+      max_tokens: LLM.defaultParams.maxTokens,
+      temperature: LLM.defaultParams.temperature,
       messages: nonSystemMessages,
     };
     if (systemMessages.length > 0) {

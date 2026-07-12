@@ -48,6 +48,10 @@ export class ChatGPT extends LLM {
     format?: 'boolean' | 'json'
   ): Promise<ChatResponse> {
     const body: Record<string, unknown> = { model, messages };
+    // reasoning models (o*/gpt-5*) reject any temperature but their default
+    if (!/^(o\d|gpt-5)/.test(model)) {
+      body.temperature = LLM.defaultParams.temperature;
+    }
     if (format === 'json') {
       body.response_format = { type: 'json_object' };
     }

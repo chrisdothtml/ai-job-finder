@@ -39,7 +39,35 @@ function statusTitle(status: number): string {
   return 'Request failed';
 }
 
+/**
+ * Provider-agnostic chat parameters. Every provider applies these where its
+ * API supports them; they live here (rather than per-provider) so the
+ * providers behave consistently.
+ */
+export interface ChatParams {
+  /**
+   * Sampling temperature. 0 (deterministic) because every chat in this app is
+   * a classification/scoring/extraction task: any sampling — especially in a
+   * reasoning model's thinking trace — compounds into run-to-run result flips
+   * for the same input. Note: OpenAI reasoning models (the "o" and "gpt-5"
+   * families) reject an explicit temperature, so ChatGPT omits it for those.
+   */
+  temperature: number;
+  /**
+   * Response token cap. The Anthropic API REQUIRES an explicit value, so it
+   * must be defined here; the other providers' APIs default it when omitted
+   * and don't need it sent (for OpenAI reasoning models a cap would even be
+   * harmful: reasoning tokens count against it, risking truncated output).
+   */
+  maxTokens: number;
+}
+
 export abstract class LLM {
+  static defaultParams: ChatParams = {
+    temperature: 0,
+    maxTokens: 4096,
+  };
+
   static async clearConvos() {
     await fs.rm(convosDir, { force: true, recursive: true });
   }
