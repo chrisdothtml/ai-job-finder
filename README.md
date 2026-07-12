@@ -1,4 +1,4 @@
-![Preview gif showing the analysis phase completing and a jobs list appearing](./.github/assets/preview-banner.gif)
+![Preview showing the UI with some jobs listed](./.github/assets/readme-banner.png)
 
 # ai-job-finder
 
@@ -44,6 +44,8 @@ Once you've done that, you can start an analysis run and wait for your jobs to s
 ### How long does analysis take to run?
 
 Depends on how many companies you selected. When I run with Ollama on my gaming PC with all companies selected, it takes many hours; so I just let it run overnight. A single company, however, takes ~6 minutes.
+
+![Preview gif showing the analysis phase completing and a jobs list appearing](./.github/assets/preview-banner.gif)
 
 ## LLM Providers
 
