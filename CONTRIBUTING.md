@@ -22,7 +22,7 @@ To start a local dev server, you can run:
 yarn app:dev
 ```
 
-Note that `yarn dev` auto-re-compiles after both backend and frontend changes, but you need to manually refresh your browser to see changes.
+Note that `yarn app:dev` auto-re-compiles after both backend and frontend changes, but you need to manually refresh your browser to see changes (this is intentional).
 
 For a static production build, you can run:
 
@@ -65,3 +65,17 @@ yarn screenshot-app
 ```
 
 This is what I use to generate the README banner image. It spins up the docs dev server, screenshots the app preview shown on the page, and updates the banner file.
+
+## Claude skills
+
+### `/create-scraper`
+
+This is an extremely capable skill used for adding new company scrapers (see existing ones in [src/analysis/scraping/](./src/analysis/scraping/)). It should have all the context needed for Claude to: 1. find the correct careers page for a company, 2. build a robust scraper for its job postings (following a similar format as the other scrapers), and 3. update all the relevant parts of the codebase.
+
+So far it has never needed to resort to creating a scraper that requires spinning up an actual web browser, and has always found a way via network requests.
+
+Most of the scrapers in this codebase were created via this skill, so you should feel very empowered to use this skill if there's a company you want that's not already handled.
+
+### `/find-companies`
+
+This is kind of an old skill I used when I first started this project, when I wanted to amass a large list of companies for potentially adding new scrapers. The list of companies is now quite sizable, so I don't really use this skill; but I'm keeping it around since it has some useful info in it.

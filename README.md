@@ -12,11 +12,9 @@ The basic flow is this:
 
 1. Use [scrapers](./src/analysis/scraping/) which can reliably fetch all the jobs a given company has available
 
-- Initially I was writing these scrapers manually, but now they're pretty much entirely written by Claude Code via [skills](./.claude/skills/)
+2. Take the huge list of job titles and locations, and pass them through filtering agents, which cut out any that are clearly not a good fit for the user
 
-3. Take the huge list of job titles and locations, and pass them through a filtering agent, which cuts out any that are clearly not a good fit for the user
-
-4. Fetch the full info for the remaining jobs and send them through an analysis agent, which generates a fitness score as well as pros/cons based on your preferences
+3. Fetch the full info for the remaining jobs and send them through an analysis agent, which generates a fitness score as well as pros/cons based on your preferences
 
 ## Starting the server
 
@@ -29,21 +27,15 @@ yarn install
 # build & start the server
 yarn app:build && yarn app:start
 
-# optional PORT var can be used
-PORT=1337 yarn app:start
+# optional HOST and PORT vars can be used
+HOST="0.0.0.0" PORT=1337 yarn app:start
 ```
 
-When you first open it in your browser, you'll need to go through the onboarding flow:
-
-![Onboarding preview gif showing how to go through the steps to fill out your info](./.github/assets/onboarding-preview.gif)
-
-Once you've done that, you can start an analysis run and wait for your jobs to show up!
+When you first open it in your browser, you'll need to go through the onboarding flow. Once you've done that, you can start an analysis run and wait for your jobs to show up!
 
 ### How long does analysis take to run?
 
-Depends on how many companies you selected. When I run with Ollama on my gaming PC with all companies selected, it takes many hours; so I just let it run overnight. A single company, however, takes ~6 minutes.
-
-![Preview gif showing the analysis phase completing and a jobs list appearing](./.github/assets/preview-banner.gif)
+This is dependent on the model you're using and the companies you selected. When I run with Ollama on my gaming PC with all companies selected, it takes ~8.5 hours; so I just let it run overnight. A single company, however, might take 5-10 minutes (or longer if they have many jobs posted).
 
 ## LLM Providers
 
@@ -70,6 +62,10 @@ You can get an API key to use with the job analysis at https://console.anthropic
 Also a very great set of models (and the creator of the `gpt-oss:20b` model I use with Ollama), ChatGPT is [Open AI's](https://openai.com/) LLM models.
 
 You can get an API key to use with the job analysis at https://platform.openai.com.
+
+## How much does it cost when using paid LLMs?
+
+This is extremely variable based on size of your resume, number of companies chosen, number of jobs available by the company, etc. In the future I may add some token usage estimates that can be compared against paid model pricing for accurate estimates.
 
 ## License
 

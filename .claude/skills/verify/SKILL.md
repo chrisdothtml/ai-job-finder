@@ -7,7 +7,7 @@ description: How to run and drive this app to verify UI/server changes at runtim
 
 ## Launch
 
-- Dev server: `yarn dev` (nodemon) or `yarn server:start`; serves at
+- Dev server: `yarn app:dev` (nodemon) or `yarn server:start`; serves at
   `http://localhost:8000` (PORT env, default 8000). Check first — it's often
   already running.
 - In dev mode the UI is bundled from `src/ui` per request via esbuild
