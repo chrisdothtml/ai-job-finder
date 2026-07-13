@@ -22,9 +22,8 @@ import { jobsFile } from '../../constants.ts';
 import { toLLMError } from '../../LLMs/_LLM.ts';
 import { Ollama } from '../../LLMs/Ollama.ts';
 import { resolveLLM } from '../../LLMs/resolveLLM.ts';
-import { cachedFetch } from '../../utils/fetch.ts';
+import { fetchCompanyFavicon } from '../../utils/favicon.ts';
 import { pathExists } from '../../utils/node.ts';
-import { time } from '../../utils/shared.ts';
 import { tokenEncryptor } from '../utils.ts';
 
 export const api = new Router();
@@ -70,14 +69,6 @@ api.get('/api/companies', async (ctx) => {
   ctx.body = companies;
 });
 
-const FAVICON_CACHE_TTL = 14 * time.day;
-// dedupes concurrent fetches for the same domain, since a page of job
-// cards can request the same company's favicon many times at once
-const inflightFavicons = new Map<
-  string,
-  Promise<{ ok: boolean; contentType: string | null; body: Buffer }>
->();
-
 // proxies the company's favicon from google's favicon service, so the
 // browser never hits google directly and responses are cached on disk
 api.get('/api/company-favicon/:slug', async (ctx) => {
@@ -88,24 +79,7 @@ api.get('/api/company-favicon/:slug', async (ctx) => {
     return;
   }
 
-  const domain = new URL(company.homepage).hostname;
-  let inflight = inflightFavicons.get(domain);
-  if (!inflight) {
-    inflight = (async () => {
-      const res = await cachedFetch.call(
-        { cacheTTL: FAVICON_CACHE_TTL },
-        `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
-      );
-      return {
-        ok: res.ok,
-        contentType: res.headers.get('content-type'),
-        body: Buffer.from(await res.arrayBuffer()),
-      };
-    })().finally(() => inflightFavicons.delete(domain));
-    inflightFavicons.set(domain, inflight);
-  }
-
-  const icon = await inflight;
+  const icon = await fetchCompanyFavicon(company);
   if (!icon.ok) {
     ctx.body = '404: Not Found';
     ctx.status = 404;

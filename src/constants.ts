@@ -2,6 +2,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+export const repoUrl = 'https://github.com/chrisdothtml/ai-job-finder';
+
 // paths inside the repo
 export const repoRootDir = path.resolve(import.meta.dirname, '..');
 export const dataDir = path.join(repoRootDir, '.data');

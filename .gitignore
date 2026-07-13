@@ -3,6 +3,8 @@
 .playwright-mcp
 .remember
 .yarn
+docs
+!src/docs
 node_modules
 settings.local.json
 TODO.md

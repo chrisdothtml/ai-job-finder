@@ -3,17 +3,22 @@ import { type Company } from '../../analysis/companies.ts';
 import { type AnalyzedJob } from '../../analysis/manager.ts';
 import { ScoreRing } from './ScoreRing.tsx';
 
-export type CompanyInfo = Company & { slug: string };
+export type CompanyInfo = Company & {
+  slug: string;
+  // overrides the favicon API endpoint; the static docs site has no server,
+  // so its build bakes the icons into the page's assets instead
+  faviconSrc?: string;
+};
 
 // renders nothing if the favicon can't be fetched (e.g. the company's
 // homepage changed and google has no icon for the old domain)
-export function CompanyFavicon({ slug }: { slug: string }) {
+export function CompanyFavicon({ slug, src }: { slug: string; src?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return null;
   return (
     <img
       className="company-favicon"
-      src={`api/company-favicon/${slug}`}
+      src={src ?? `api/company-favicon/${slug}`}
       alt=""
       loading="lazy"
       onError={() => setFailed(true)}
@@ -105,20 +110,26 @@ export function JobCard({
   idx,
   company,
   hideCompany,
+  className = '',
 }: {
   job: AnalyzedJob;
   idx: number;
   company?: CompanyInfo;
   // set when a surrounding company group already shows the company info
   hideCompany?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="job-card" style={{ animationDelay: `${idx * 30}ms` }}>
+    <div
+      className={`job-card ${className}`}
+      style={{ animationDelay: `${idx * 30}ms` }}>
       <div className="card-header">
         <div className="card-meta">
           {!hideCompany && (
             <div className="company-name">
-              {company && <CompanyFavicon slug={company.slug} />}
+              {company && (
+                <CompanyFavicon slug={company.slug} src={company.faviconSrc} />
+              )}
               {company ? (
                 <a href={company.homepage} target="_blank">
                   {job.companyName}

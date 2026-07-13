@@ -40,7 +40,9 @@ export function CompanyGroup({
             setOpen((o) => !o);
           }
         }}>
-        {company && <CompanyFavicon slug={company.slug} />}
+        {company && (
+          <CompanyFavicon slug={company.slug} src={company.faviconSrc} />
+        )}
         <span className="company-group-name">
           {company ? (
             <a href={company.homepage} target="_blank">

@@ -2,7 +2,7 @@
 
 # ai-job-finder
 
-> Let AI browse all those careers listings pages for you, so you can spend your time doing literally anything else
+> Let AI read the careers pages for you, so you can spend your time doing literally anything else
 
 ## What is it?
 

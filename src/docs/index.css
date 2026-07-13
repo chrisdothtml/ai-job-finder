@@ -1,0 +1,465 @@
+/* the docs page is styled on top of the real app's CSS so cards, toolbar,
+   fonts, and palette never drift from the product */
+@import '../ui/App.css';
+@import '../ui/Jobs/Jobs.css';
+
+html {
+  scroll-behavior: smooth;
+}
+
+.no-pointer-events {
+  pointer-events: none;
+}
+
+@media (min-width: 641px) {
+  .hidden-desktop {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hidden-mobile {
+    display: none;
+  }
+}
+
+/* ── Hero wash ──────────────────────────────────────── */
+/* soft mint watercolor that fades into the app background */
+.docs-wash {
+  padding-bottom: 48px;
+  background:
+    radial-gradient(
+      900px 480px at 15% -5%,
+      oklch(95% 0.055 160 / 0.9),
+      transparent 65%
+    ),
+    radial-gradient(
+      1100px 600px at 85% 20%,
+      oklch(92% 0.06 170 / 0.75),
+      transparent 60%
+    ),
+    radial-gradient(
+      1400px 800px at 50% 75%,
+      oklch(86% 0.075 175 / 0.55),
+      transparent 68%
+    ),
+    linear-gradient(to bottom, oklch(96.5% 0.035 155), var(--bg));
+}
+
+/* ── Nav ────────────────────────────────────────────── */
+.docs-nav {
+  position: sticky;
+  top: 12px;
+  z-index: 100;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 14px 16px 0;
+}
+
+.docs-nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 18px;
+  background: oklch(99.5% 0.004 75 / 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.docs-nav-links {
+  display: flex;
+  gap: 20px;
+  margin-left: 16px;
+}
+
+.docs-nav-links a {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.docs-nav-links a:hover {
+  color: var(--text-primary);
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+.docs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.docs-btn.primary {
+  background: var(--text-primary);
+  color: var(--bg);
+}
+
+.docs-btn.primary:hover {
+  background: oklch(30% 0.01 75);
+}
+
+.docs-btn.secondary {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.docs-btn.secondary:hover {
+  border-color: var(--border-hover);
+}
+
+.docs-btn.small {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.docs-btn-icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* ── Hero ───────────────────────────────────────────── */
+.docs-hero {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 84px 24px 56px;
+}
+
+.docs-hero h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(38px, 6vw, 60px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  max-width: 720px;
+  text-wrap: balance;
+}
+
+.docs-hero p {
+  margin-top: 20px;
+  max-width: 570px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.docs-hero-ctas {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+/* ── App preview frame ──────────────────────────────── */
+.docs-frame-wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.docs-frame {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 60px oklch(40% 0.06 165 / 0.16),
+    0 4px 16px oklch(0% 0 0 / 0.05);
+}
+
+.docs-frame-chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-frame-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-hover);
+}
+
+.docs-frame-url {
+  margin: 0 auto;
+  padding: 3px 40px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* the app's toolbar is sticky; inside the frame it's just decor */
+.docs-frame .toolbar {
+  position: static;
+}
+
+.docs-frame .main {
+  padding: 24px;
+}
+
+/* ── Sections ───────────────────────────────────────── */
+.docs-section {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 24px 0;
+  scroll-margin-top: 72px;
+}
+
+.docs-section h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.docs-section-sub {
+  margin-top: 10px;
+  max-width: 620px;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* ── How it works ───────────────────────────────────── */
+.docs-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.docs-step {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.docs-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 12px;
+  border: 1px solid var(--green-border);
+  border-radius: 50%;
+  background: var(--green-bg);
+  color: var(--green);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.docs-step h3,
+.docs-provider h3 {
+  margin-bottom: 6px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.docs-step p,
+.docs-provider p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* ── Providers ──────────────────────────────────────── */
+.docs-providers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.docs-provider {
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.docs-provider img {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+}
+
+.docs-provider code {
+  font-size: 12.5px;
+  padding: 1px 5px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.docs-provider a {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.docs-provider a:hover {
+  text-decoration: underline;
+}
+
+.docs-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  vertical-align: 2px;
+  border: 1px solid var(--green-border);
+  border-radius: 999px;
+  background: var(--green-bg);
+  color: var(--green);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.docs-note {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-left: 2.5px solid var(--blue);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--blue-bg);
+  color: oklch(35% 0.09 240);
+  font-size: 13.5px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* ── Code block ─────────────────────────────────────── */
+.docs-code {
+  margin-top: 28px;
+  padding: 20px 22px;
+  border-radius: var(--radius-lg);
+  background: oklch(22% 0.012 75);
+  color: oklch(92% 0.005 75);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.docs-code .c {
+  color: oklch(62% 0.02 145);
+}
+
+/* ── Footer ─────────────────────────────────────────── */
+.docs-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 1080px;
+  margin: 72px auto 0;
+  padding: 28px 24px 40px;
+  border-top: 1px solid var(--border);
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.docs-footer .github-logo {
+  color: #000;
+  width: 20px;
+  height: 20px;
+  margin-right: -4px;
+}
+
+.docs-footer a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.docs-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ── Mobile ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .docs-nav-links {
+    display: none;
+  }
+
+  .docs-hero {
+    padding: 48px 16px 36px;
+  }
+
+  .docs-frame-wrap {
+    padding: 0 12px;
+  }
+
+  .docs-frame .main {
+    padding: 14px;
+  }
+
+  .docs-section {
+    padding: 56px 16px 0;
+  }
+
+  .docs-footer {
+    margin-top: 56px;
+    padding: 24px 16px 32px;
+  }
+}
+
+/* ── Screenshot mode ────────────────────────────────── */
+/* in the dev server, `?screenshot` renders just the app preview on a
+   transparent background so screenshot-docs.ts can capture it as a
+   banner image. The wrap padding matches the extents of the frame's
+   drop shadow */
+.screenshot-mode,
+.screenshot-mode body {
+  background: transparent;
+}
+
+/* entrance animations would otherwise be captured mid-flight */
+.screenshot-mode *,
+.screenshot-mode *::before,
+.screenshot-mode *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.screenshot-mode .docs-frame-wrap {
+  max-width: none;
+  padding: 40px 64px 88px;
+}
+
+.screenshot-mode .docs-frame .main {
+  max-height: 500px;
+  overflow: hidden;
+}

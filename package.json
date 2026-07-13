@@ -11,6 +11,8 @@
     "// entrypoints": "-----------------------",
     "analyze": "./bin/tsn --env-file=.env ./src/.scripts/analyze.ts",
     "compare-models": "./bin/tsn --env-file=.env ./src/.scripts/compare-models.ts",
+    "docs:dev": "./bin/tsn ./src/.scripts/esbuild.ts docsDev",
+    "docs:build": "./bin/tsn ./src/.scripts/esbuild.ts docsBuild",
     "app:dev": "nodemon -w src/server -e ts -x 'yarn server:start'",
     "app:build": "./bin/tsn ./src/.scripts/esbuild.ts appBuild",
     "app:start": "NODE_ENV=production yarn server:start"

@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
-    "src/{server,ui}/index.ts!",
+    "src/{docs,server,ui}/index.{ts,tsx}",
     "src/.scripts/*.ts",
     "src/**/*.test.ts"
   ],
