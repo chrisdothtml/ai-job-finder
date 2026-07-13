@@ -1,12 +1,12 @@
 import path from 'node:path';
+import { Analyzer } from '../analysis/Analyzer.ts';
+import { companies } from '../analysis/companies.ts';
+import { manager, ManagerEvent, managerEvents } from '../analysis/manager.ts';
+import { type AnalyzerSettings } from '../analysis/types.ts';
 import { dataDir, repoRootDir } from '../constants.ts';
 import { getEnv, readIfExists } from '../utils/node.ts';
 import { getGeoLocation } from '../utils/shared.ts';
 import { Spinner } from '../utils/Spinner.ts';
-import { Analyzer } from './Analyzer.ts';
-import { companies } from './companies.ts';
-import { manager, ManagerEvent, managerEvents } from './manager.ts';
-import { type AnalyzerSettings } from './types.ts';
 
 await analyze(await createSettings());
 

@@ -46,7 +46,7 @@ yarn analyze
 
 This is a way to run the full analysis without spinning up the UI. The resulting jobs file is stored in the same place as when the analysis happens from the UI (`~/.ai-job-finder/jobs.json`).
 
-See [src/analysis/analyze.ts](./src/analysis/analyze.ts) for the entry point.
+See [src/.script/analyze.ts](./src/.script/analyze.ts) for the entry point.
 
 ### LLM Model Comparison/Benchmarking
 
@@ -56,4 +56,4 @@ yarn compare-models
 
 This allows for benchmarking and comparing outputs for all the LLM interactions in the analysis flow across different models and model providers, using a fixed set of data.
 
-See [src/analysis/compare-models.ts](./src/analysis/compare-models.ts) for the entry point.
+See [src/.script/compare-models.ts](./src/.script/compare-models.ts) for the entry point.

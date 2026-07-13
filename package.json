@@ -10,8 +10,8 @@
     "server:start": "./bin/tsn --env-file=.env ./src/server/index.ts",
     "ui:build:base": "esbuild src/ui/index.tsx --bundle --outdir=public/bundles --external:'node:*' --format=esm",
     "// entrypoints": "-----------------------",
-    "analyze": "./bin/tsn --env-file=.env ./src/analysis/analyze.ts",
-    "compare-models": "./bin/tsn --env-file=.env ./src/analysis/compare-models.ts",
+    "analyze": "./bin/tsn --env-file=.env ./src/.scripts/analyze.ts",
+    "compare-models": "./bin/tsn --env-file=.env ./src/.scripts/compare-models.ts",
     "dev": "nodemon -w src/server -e ts -x 'yarn server:start'",
     "build": "yarn ui:build:base --minify --define:DEV=false",
     "start": "NODE_ENV=production yarn server:start"

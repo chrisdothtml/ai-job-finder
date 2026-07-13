@@ -16,6 +16,14 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {
+  Analyzer,
+  type JobFitResponse,
+  type JobLocationInfo,
+} from '../analysis/Analyzer.ts';
+import { companies, getScraper } from '../analysis/companies.ts';
+import { type ListedJob } from '../analysis/scraping/Scraper.ts';
+import { type Config, type UserInfo } from '../analysis/types.ts';
 import { dataDir } from '../constants.ts';
 import {
   getEnv,
@@ -24,14 +32,6 @@ import {
   readIfExists,
 } from '../utils/node.ts';
 import { dedent, getGeoLocation } from '../utils/shared.ts';
-import {
-  Analyzer,
-  type JobFitResponse,
-  type JobLocationInfo,
-} from './Analyzer.ts';
-import { companies, getScraper } from './companies.ts';
-import { type ListedJob } from './scraping/Scraper.ts';
-import { type Config, type UserInfo } from './types.ts';
 
 const modelComparisonDir = path.join(dataDir, 'model-comparison');
 const cacheDir = path.join(modelComparisonDir, '.cache');
@@ -68,6 +68,16 @@ async function main() {
       companySlug: 'replit',
       id: 'd0e0dd7d-59d1-4de8-afbb-54aea680b51d',
       note: 'good fit, bad location',
+    },
+    {
+      companySlug: 'databricks',
+      id: '7882009002',
+      note: 'bad fit, good location',
+    },
+    {
+      companySlug: 'figma',
+      id: '5980571004',
+      note: 'good fit overall',
     },
   ];
 
