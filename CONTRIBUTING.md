@@ -57,3 +57,11 @@ yarn compare-models
 This allows for benchmarking and comparing outputs for all the LLM interactions in the analysis flow across different models and model providers, using a fixed set of data.
 
 See [src/.script/compare-models.ts](./src/.script/compare-models.ts) for the entry point.
+
+### App screenshot
+
+```sh
+yarn screenshot-app
+```
+
+This is what I use to generate the README banner image. It spins up the docs dev server, screenshots the app preview shown on the page, and updates the banner file.

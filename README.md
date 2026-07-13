@@ -1,4 +1,4 @@
-![Preview showing the UI with some jobs listed](./.github/assets/readme-banner.png)
+![Preview showing the UI with some jobs listed](./.github/assets/banner.png)
 
 # ai-job-finder
 

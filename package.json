@@ -11,6 +11,7 @@
     "// entrypoints": "-----------------------",
     "analyze": "./bin/tsn --env-file=.env ./src/.scripts/analyze.ts",
     "compare-models": "./bin/tsn --env-file=.env ./src/.scripts/compare-models.ts",
+    "screenshot-app": "./bin/tsn ./src/.scripts/screenshot-app.ts",
     "docs:dev": "./bin/tsn ./src/.scripts/esbuild.ts docsDev",
     "docs:build": "./bin/tsn ./src/.scripts/esbuild.ts docsBuild",
     "app:dev": "nodemon -w src/server -e ts -x 'yarn server:start'",
@@ -38,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "nodemon": "^3.1.14",
+    "playwright-core": "^1.61.1",
     "prettier": "^3.6.2",
     "prettier-plugin-sh": "^0.18.0",
     "typescript": "^5.9.2"

@@ -1399,6 +1399,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"playwright-core@npm:^1.61.1":
+  version: 1.61.1
+  resolution: "playwright-core@npm:1.61.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 10c0/c28896ba82a602182e240ed4f9c467fb0dd9cb57d510f8aba9f25183fe1cde3a0105725a29baffa4157fe885bbb11e228032a2aad0424111584fde45303f07bd
+  languageName: node
+  linkType: hard
+
 "prettier-plugin-sh@npm:^0.18.0":
   version: 0.18.1
   resolution: "prettier-plugin-sh@npm:0.18.1"
@@ -1508,6 +1517,7 @@ __metadata:
     koa: "npm:^3.2.0"
     koa-static: "npm:^5.0.0"
     nodemon: "npm:^3.1.14"
+    playwright-core: "npm:^1.61.1"
     prettier: "npm:^3.6.2"
     prettier-plugin-sh: "npm:^0.18.0"
     react: "npm:^19.2.5"
