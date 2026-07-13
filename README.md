@@ -67,6 +67,30 @@ You can get an API key to use with the job analysis at https://platform.openai.c
 
 This is extremely variable based on size of your resume, number of companies chosen, number of jobs available by the company, etc. In the future I may add some token usage estimates that can be compared against paid model pricing for accurate estimates.
 
+## Future features
+
+This is just a side project for me while I'm searching for a new job, so I'm not sure if I'll ever get around to these; but here are some ideas I've had for new features to add to this:
+
+### Showing summarized job content in-UI
+
+Currently it just links to the job posting for matching jobs. Personally, even when faced with the best matching jobs for me, it still can be a bit much to read through so many full job postings, when really I'm interested in like the last paragraph or two of it (typically where it lists what they're actually looking for/what you'll do).
+
+It could be nice to surface an LLM summary of the actually interesting parts of the job posting (possibly inline on each job or in a modal screen).
+
+### Generating answers for application questions
+
+The part I actually find most exhausting about applying to a lot of jobs is how most of them have one or two non-standard questions you need to answer (e.g. "Why do you want to work here?", "What's something cool you've worked on recently?"), and not one single job manager saves this info across pages if you're applying to multiple jobs at the same company.
+
+Similar to the item above this about surfacing job info in the UI, it could be cool to offer up answers to these questions for each job (or maybe generate them on the fly if you find a specific job you're interested in).
+
+I suspect scraping for this info might not be as straightforward as my current scraping approach, but I could be wrong.
+
+### Interview prep
+
+Generating potential questions that may be asked in an interview for a job could be very helpful in prepping for an impending interview. This could also be something that's generated on the fly from a button on each job or something.
+
+Another idea I had was using [faster-whisper](https://github.com/SYSTRAN/faster-whisper) along with some TTS approach to conduct simulated interviews with your chosen model. I suspect this may be a rabbit hole that may take quite a lot of work to get into a state that's actually useful.
+
 ## License
 
 [MIT](./LICENSE)
