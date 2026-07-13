@@ -27,10 +27,10 @@ I would recommend installing [Volta](https://volta.sh/), which will auto-fetch a
 yarn install
 
 # build & start the server
-yarn build && yarn start
+yarn app:build && yarn app:start
 
 # optional PORT var can be used
-PORT=1337 yarn start
+PORT=1337 yarn app:start
 ```
 
 When you first open it in your browser, you'll need to go through the onboarding flow:

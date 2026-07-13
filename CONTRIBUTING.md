@@ -19,7 +19,7 @@ yarn install
 To start a local dev server, you can run:
 
 ```sh
-yarn dev
+yarn app:dev
 ```
 
 Note that `yarn dev` auto-re-compiles after both backend and frontend changes, but you need to manually refresh your browser to see changes.
@@ -27,7 +27,7 @@ Note that `yarn dev` auto-re-compiles after both backend and frontend changes, b
 For a static production build, you can run:
 
 ```sh
-yarn build && yarn start
+yarn app:build && yarn app:start
 ```
 
 ## Other useful tooling

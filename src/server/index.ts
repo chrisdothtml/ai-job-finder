@@ -1,14 +1,13 @@
 import { bodyParser } from '@koa/bodyparser';
 import Koa from 'koa';
-import path from 'node:path';
-import { publicDir, repoRootDir } from '../constants.ts';
+import { publicDir } from '../constants.ts';
 import { getEnv } from '../utils/node.ts';
 import { api } from './middleware/api.ts';
 
 const server = new Koa();
 const PORT = parseInt(getEnv('PORT', '8000'));
 const HOST = getEnv('HOST', 'localhost');
-const DEV = getEnv('NODE_ENV') !== 'production';
+const __DEV__ = getEnv('NODE_ENV') !== 'production';
 
 // an SSE client disconnecting mid-stream (page reload/close while subscribed
 // to /api/analysis/events) surfaces as a premature close on the response
@@ -24,20 +23,11 @@ server.use(api.routes()).use(api.allowedMethods());
 
 // use esbuild dev server during development, otherwise just statically
 // serve the public dir (assumes a ui build is ran first)
-if (DEV) {
+if (__DEV__) {
   const { esbuild } = await import('./middleware/esbuild.ts');
+  const { esbuildConfigs } = await import('../.scripts/esbuild.ts');
 
-  server.use(
-    await esbuild(publicDir, {
-      entryPoints: [path.join(repoRootDir, 'src/ui/index.tsx')],
-      bundle: true,
-      outdir: path.join(publicDir, 'bundles'),
-      external: ['node:*'],
-      format: 'esm',
-      sourcemap: 'inline',
-      define: { DEV: 'true' },
-    })
-  );
+  server.use(await esbuild(publicDir, esbuildConfigs.appDev));
 } else {
   const { default: serve } = await import('koa-static');
   server.use(serve(publicDir));
