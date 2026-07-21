@@ -8,6 +8,8 @@ const TEST_COMPANIES: CompanySlug[] = [
   'airbnb',
   'applovin',
   'block',
+  'canva',
+  'crewai',
   'github',
   'netflix',
   'shopify',

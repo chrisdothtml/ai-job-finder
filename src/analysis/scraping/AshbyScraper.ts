@@ -12,7 +12,7 @@ interface AshbyAddress {
 
 interface AshbySecondaryLocation {
   location: string;
-  address: AshbyAddress;
+  address: AshbyAddress | null;
 }
 
 interface AshbyPosting {
@@ -35,9 +35,12 @@ interface AshbyJobBoard {
   jobs: AshbyPosting[];
 }
 
-function formatAddress(address: AshbyAddress): string {
-  const { addressLocality, addressCountry } = address.postalAddress;
-  return [addressLocality, addressCountry].filter(Boolean).join(', ');
+function formatAddress(sec: AshbySecondaryLocation): string {
+  if (!sec.address) return sec.location;
+  const { addressLocality, addressCountry } = sec.address.postalAddress;
+  return (
+    [addressLocality, addressCountry].filter(Boolean).join(', ') || sec.location
+  );
 }
 
 export default class AshbyScraper extends Scraper {
@@ -61,7 +64,7 @@ export default class AshbyScraper extends Scraper {
     return res.jobs.map((posting) => {
       const locations = [posting.location];
       for (const sec of posting.secondaryLocations) {
-        const loc = formatAddress(sec.address);
+        const loc = formatAddress(sec);
         if (loc && !locations.includes(loc)) locations.push(loc);
       }
       return {
