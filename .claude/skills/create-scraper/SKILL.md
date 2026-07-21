@@ -10,7 +10,7 @@ Your goal is to explore a company's careers page and write a permanent, reliable
 
 ## Step 1a - Identify the url for the careers page
 
-If the careers page has been provided as the argument, move to the next step; otherwise search "[company-name] careers" on google and navigate until you find the careers page.
+If the careers page has been provided as the argument, move to the next step; otherwise search "[company-name] careers" via the `WebSearch` tool and navigate until you find the careers page.
 
 ## Step 1b — Identify the company name
 

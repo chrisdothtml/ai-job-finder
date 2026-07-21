@@ -34,7 +34,7 @@ function getCompaniesFromEnv(): CompanySlug[] | null {
     for (const slug of slugs) {
       if (!companies.hasOwnProperty(slug)) {
         throw new Error(
-          `Companies provided via 'TEST_COMPANIES' env var must exist in 'company-listings.ts'`
+          `Companies provided via 'TEST_COMPANIES' env var must exist in 'companies.ts'`
         );
       }
     }
