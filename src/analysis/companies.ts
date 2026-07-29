@@ -232,6 +232,13 @@ export const companies: Record<string, Company> = {
     summary:
       'AI-focused cloud provider offering large-scale NVIDIA GPU infrastructure for training and inference, used by leading AI labs.',
   },
+  console: {
+    name: 'Console',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.console.dev',
+    summary:
+      'AI startup building autonomous agents that resolve enterprise IT, HR, Legal, Finance, Security, and Ops tickets from Slack or Teams without human intervention.',
+  },
   coupang: {
     name: 'Coupang',
     scraper: 'GreenhouseScraper',
@@ -875,6 +882,13 @@ export const companies: Record<string, Company> = {
     homepage: 'https://temporal.io',
     summary:
       'Company behind the open-source Temporal durable-execution platform, which guarantees workflows resume exactly where they left off after any failure.',
+  },
+  thumbtack: {
+    name: 'Thumbtack',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.thumbtack.com',
+    summary:
+      'Online marketplace connecting homeowners with local service professionals for home repair, maintenance, and improvement projects.',
   },
   togetherai: {
     name: 'Together AI',
