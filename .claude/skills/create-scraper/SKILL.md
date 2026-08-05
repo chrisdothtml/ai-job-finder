@@ -108,10 +108,6 @@ export class {Name}Scraper extends Scraper {
   async getJobContent(id: string): Promise<string> {
     // Call the job detail API endpoint and return JSON.stringify(data)
   }
-
-  async jobStillExists(id: string): Promise<boolean> {
-    // Absolutely determine whether the job id is still live — see Step 6c
-  }
 }
 ```
 
@@ -149,30 +145,10 @@ export class {Name}Scraper extends Scraper {
       // Extract and return the meaningful text content of the posting
     });
   }
-
-  async jobStillExists(id: string): Promise<boolean> {
-    // Absolutely determine whether the job id is still live — see Step 6c
-  }
 }
 ```
 
 Pagination in DOM scrapers: look for a "Next" button or "Load more" and loop until it's gone or disabled. Confirm the selector works by watching the snapshot change between pages during exploration.
-
-### 6c — Implement `jobStillExists`
-
-Every scraper must implement `jobStillExists(id): Promise<boolean>`, which callers use to confirm a previously-seen job hasn't been pulled down. It must be an **absolute, accurate** check against the live source — never inferred from cached data, and never a guess based on `getJobsList`/`getJobContent` succeeding for unrelated reasons.
-
-To find the right approach for a new scraper:
-
-1. Grab a **real, currently-listed job id** (e.g. the first result from `getJobsList`) and a **fake id known not to exist** (e.g. `'__nonexistent-job-id-000000__'`, or an all-zeros UUID/number depending on the id format the source expects).
-2. Call whatever endpoint/page the scraper already uses for job details with both ids, and compare the raw responses — status code, body shape, everything. Don't assume a 404 status is used; some sources (see Google, below) return HTTP 200 for both and only differ in the payload.
-3. Pick the check that's cheapest and most reliable:
-   - **Dedicated per-job API endpoint returns 404 for missing jobs** (Greenhouse, Lever, SmartRecruiters, Workable, Shopify): just check `res.ok`.
-   - **No per-job endpoint, but the full listing only ever contains live jobs** (Ashby — its detail endpoint 401s and isn't usable): fetch the list fresh (uncached) and check whether the id is present.
-   - **The detail _page_ (not the API) 404s even though other endpoints don't** (GitHub — its `/api/jobs?req_id=` filter is silently ignored server-side and always returns the top result regardless of id): fall back to the HTML job-detail page URL and check its status.
-   - **Same URL/status for both real and fake ids, only the payload differs** (Google — returns HTTP 200 either way; a missing job's embedded JS data callback carries an error payload, e.g. `errorHasStatus: true`, instead of job fields): parse just enough of the response to distinguish the two shapes. Don't reuse a parser written for the happy path if the error payload breaks its assumptions (it commonly won't have the same field layout/sentinels) — write a minimal, purpose-built check instead.
-4. Always fetch uncached (`cachedFetch.call({ cache: false }, url)`) — a stale cache entry would defeat the point of an existence check.
-5. If a company's actual API is unreachable while you're building the scraper (bot protection, geo-blocking, etc.), implement `jobStillExists` consistent with the pattern already established by `getJobContent`'s endpoint (most job-board APIs 404 a missing id), but say so explicitly when reporting back — don't claim it as verified.
 
 ### Shared conventions
 
