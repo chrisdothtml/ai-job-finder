@@ -36,6 +36,13 @@ export const companies: Record<string, Company> = {
     summary:
       'No-code app platform that combines the ease of a spreadsheet with the power of a relational database.',
   },
+  amplitude: {
+    name: 'Amplitude',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.amplitude.com',
+    summary:
+      'Digital analytics platform for tracking product usage and user behavior, helping teams analyze funnels, retention, and experiments to build better digital products.',
+  },
   andurilindustries: {
     name: 'Anduril',
     scraper: 'GreenhouseScraper',
@@ -43,12 +50,26 @@ export const companies: Record<string, Company> = {
     summary:
       'Defense technology company building AI-powered autonomous systems — drones, sensors, and weapons — for the US and allied militaries. Its products are connected by Lattice, its AI command-and-control software platform.',
   },
+  anrok: {
+    name: 'Anrok',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.anrok.com',
+    summary:
+      'Sales tax and VAT compliance platform for SaaS companies, automating tax calculation, registration, filing, and remittance across jurisdictions.',
+  },
   anthropic: {
     name: 'Anthropic',
     scraper: 'GreenhouseScraper',
     homepage: 'https://www.anthropic.com',
     summary:
       'AI safety and research company, and maker of the Claude family of large language models.',
+  },
+  apolloio: {
+    name: 'Apollo.io',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.apollo.io',
+    summary:
+      'Sales intelligence and engagement platform combining a large B2B contact database with tools for prospecting, outreach, and pipeline management.',
   },
   applied: {
     name: 'Applied Intuition',
@@ -77,6 +98,27 @@ export const companies: Record<string, Company> = {
     homepage: 'https://www.arcade.dev',
     summary:
       "Authenticated tool-calling platform ('MCP runtime') that lets AI agents securely connect to and take real actions in APIs like Gmail, Slack, and Salesforce.",
+  },
+  arcadiacareers: {
+    name: 'Arcadia',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.arcadia.com',
+    summary:
+      "Global utility data and energy solutions platform offering AI-powered analytics for carbon, cost, and reliability management, and operator of the nation's leading community solar program.",
+  },
+  arena: {
+    name: 'Arena',
+    scraper: 'AshbyScraper',
+    homepage: 'https://lmarena.ai',
+    summary:
+      'Bay Area AI evaluation company (formerly Chatbot Arena/LMSYS) that runs a large-scale public leaderboard where humans vote head-to-head between AI models across text, code, and image generation.',
+  },
+  artie: {
+    name: 'Artie',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.artie.com',
+    summary:
+      'Real-time data replication (CDC) platform that streams row-level database changes to a data warehouse in under a minute, without needing to manage Kafka or Debezium.',
   },
   asana: {
     name: 'Asana',
@@ -155,6 +197,13 @@ export const companies: Record<string, Company> = {
     summary:
       'CI/CD platform with a hybrid model: self-hosted build agents run on your own infrastructure, orchestrated by a managed cloud interface.',
   },
+  burnt: {
+    name: 'Burnt',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.getburnt.ai',
+    summary:
+      'AI startup automating the manual, fragmented workflows of the food distribution industry, built by a team of operators and engineers from inside the industry.',
+  },
   calendly: {
     name: 'Calendly',
     scraper: 'GreenhouseScraper',
@@ -168,6 +217,27 @@ export const companies: Record<string, Company> = {
     homepage: 'https://www.canva.com',
     summary:
       'Online graphic design and publishing platform with a drag-and-drop interface for creating presentations, social posts, videos, and print products.',
+  },
+  carta: {
+    name: 'Carta',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://carta.com',
+    summary:
+      'Equity management and cap table platform for private companies, also providing fund administration services for VC and PE firms.',
+  },
+  cartesia: {
+    name: 'Cartesia',
+    scraper: 'AshbyScraper',
+    homepage: 'https://cartesia.ai',
+    summary:
+      'Real-time AI voice model company building fast, natural-sounding text-to-speech and voice agent infrastructure.',
+  },
+  chalk: {
+    name: 'Chalk',
+    scraper: 'AshbyScraper',
+    homepage: 'https://chalk.ai',
+    summary:
+      'Data platform ("feature platform") for building and serving real-time machine learning features, used for fraud detection, risk, and other ML use cases.',
   },
   checkr: {
     name: 'Checkr',
@@ -225,6 +295,34 @@ export const companies: Record<string, Company> = {
     summary:
       'The largest US cryptocurrency exchange for buying, selling, and custodying digital assets.',
   },
+  collective: {
+    name: 'Collective',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.collective.com',
+    summary:
+      'All-in-one back-office platform (LLC/S-Corp formation, payroll, bookkeeping, taxes) built specifically for solo business owners and freelancers.',
+  },
+  compa: {
+    name: 'Compa',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.compa.ai',
+    summary:
+      'AI-driven compensation intelligence platform giving enterprise recruiting and HR teams real-time market pay data to inform salary and equity decisions.',
+  },
+  composio: {
+    name: 'Composio',
+    scraper: 'AshbyScraper',
+    homepage: 'https://composio.dev',
+    summary:
+      'Toolkit platform providing pre-built, authenticated integrations across hundreds of apps so AI agents can securely take real actions in a company’s software stack.',
+  },
+  'convex-dev': {
+    name: 'Convex',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.convex.dev',
+    summary:
+      'Backend/database platform ("full-stack app platform with database, compute and backend abstractions") that lets developers build apps without managing separate backend infrastructure.',
+  },
   coreweave: {
     name: 'CoreWeave',
     scraper: 'GreenhouseScraper',
@@ -266,6 +364,13 @@ export const companies: Record<string, Company> = {
     homepage: 'https://cursor.com',
     summary:
       'Maker of Cursor, the AI code editor and coding agent for building software with natural-language instructions.',
+  },
+  crusoe: {
+    name: 'Crusoe',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.crusoe.ai',
+    summary:
+      'Vertically integrated, energy-first AI infrastructure company building and operating GPU cloud data centers for large-scale AI training and inference.',
   },
   databricks: {
     name: 'Databricks',
@@ -316,6 +421,13 @@ export const companies: Record<string, Company> = {
     summary:
       'On-demand delivery marketplace for restaurant food, groceries, and retail goods.',
   },
+  drata: {
+    name: 'Drata',
+    scraper: 'AshbyScraper',
+    homepage: 'https://drata.com',
+    summary:
+      'Security and compliance automation platform that continuously monitors controls to help companies achieve and maintain certifications like SOC 2, ISO 27001, and HIPAA.',
+  },
   dropbox: {
     name: 'Dropbox',
     scraper: 'GreenhouseScraper',
@@ -357,6 +469,20 @@ export const companies: Record<string, Company> = {
     homepage: 'https://elevenlabs.io',
     summary:
       'AI audio company known for lifelike text-to-speech, voice cloning, and voice agents in 70+ languages.',
+  },
+  elicit: {
+    name: 'Elicit',
+    scraper: 'AshbyScraper',
+    homepage: 'https://elicit.com',
+    summary:
+      'AI research assistant that helps researchers search, summarize, and extract structured data from scientific literature.',
+  },
+  eliseai: {
+    name: 'EliseAI',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.eliseai.com',
+    summary:
+      'AI leasing and operations assistant for property managers and healthcare providers, automating prospect communication, scheduling, and resident/patient interactions.',
   },
   epicgames: {
     name: 'Epic Games',
@@ -414,12 +540,33 @@ export const companies: Record<string, Company> = {
     summary:
       'Maker of automated license plate reader (ALPR) cameras and surveillance software used by police departments and neighborhoods, operating in over 5,000 US communities.',
   },
+  fluidstack: {
+    name: 'Fluidstack',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.fluidstack.io',
+    summary:
+      'GPU cloud provider that builds and operates large-scale data centers for AI training and inference.',
+  },
+  freed: {
+    name: 'Freed',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.getfreed.ai',
+    summary:
+      'AI medical scribe that listens to patient visits and automatically generates clinical notes for physicians.',
+  },
   gamma: {
     name: 'Gamma',
     scraper: 'AshbyScraper',
     homepage: 'https://gamma.app',
     summary:
       'AI-powered tool that turns text prompts or documents into fully designed presentations, documents, and websites in seconds.',
+  },
+  geniusai: {
+    name: 'Genius AI',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.glossgenius.com',
+    summary:
+      'Rebrand of GlossGenius, a booking, payments, and business-management platform for beauty, wellness, and health businesses (salons, spas, med spas), now expanding into a broader AI-powered platform for service businesses.',
   },
   github: {
     name: 'GitHub',
@@ -470,12 +617,40 @@ export const companies: Record<string, Company> = {
     summary:
       'Payroll, benefits, and HR platform for small and mid-sized businesses.',
   },
+  harmonic: {
+    name: 'Harmonic',
+    scraper: 'AshbyScraper',
+    homepage: 'https://harmonic.fun',
+    summary:
+      'Palo Alto AI lab (co-founded by Robinhood CEO Vlad Tenev) developing "mathematical superintelligence" — formally verified, hallucination-free AI models for math, including its Aristotle model.',
+  },
   harvey: {
     name: 'Harvey',
     scraper: 'AshbyScraper',
     homepage: 'https://www.harvey.ai',
     summary:
       'Legal AI platform for law firms and corporate legal teams offering research, drafting, document analysis, and workflow automation. Used across 60%+ of AmLaw 100 firms.',
+  },
+  hightouch: {
+    name: 'Hightouch',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://hightouch.com',
+    summary:
+      'Reverse ETL and data activation platform that syncs data from a warehouse into business tools, forming a composable customer data platform.',
+  },
+  hyperspell: {
+    name: 'Hyperspell',
+    scraper: 'AshbyScraper',
+    homepage: 'https://hyperspell.com',
+    summary:
+      'Context and memory layer for AI agents that indexes a company\'s connected tools and documents into a memory graph agents can query for grounded, up-to-date context.',
+  },
+  idler: {
+    name: 'Idler',
+    scraper: 'AshbyScraper',
+    homepage: 'https://idler.ai',
+    summary:
+      'Startup building reinforcement-learning training environments that teach AI models to code at expert human levels, selling directly to frontier AI labs.',
   },
   instacart: {
     name: 'Instacart',
@@ -484,12 +659,40 @@ export const companies: Record<string, Company> = {
     summary:
       'Grocery delivery and pickup marketplace that also provides advertising and e-commerce technology to retailers.',
   },
+  invert: {
+    name: 'Invert',
+    scraper: 'AshbyScraper',
+    homepage: 'https://invertbio.com',
+    summary:
+      'Bioprocess data platform for biomanufacturing, biopharma, and synthetic-biology teams that automates cleaning, structuring, and analysis of bioreactor and lab data.',
+  },
   ionq: {
     name: 'IonQ',
     scraper: 'GreenhouseScraper',
     homepage: 'https://ionq.com',
     summary:
       'Publicly traded quantum computing company building trapped-ion quantum computers, accessible through the major cloud providers.',
+  },
+  january: {
+    name: 'January',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.january.com',
+    summary:
+      'Tech-enabled debt collection agency that helps lenders recover delinquent debt while giving borrowers a more compassionate, self-serve repayment experience.',
+  },
+  juicebox: {
+    name: 'Juicebox',
+    scraper: 'AshbyScraper',
+    homepage: 'https://juicebox.ai',
+    summary:
+      'AI recruiting and candidate-sourcing platform ("PeopleGPT") offering natural-language search across 800M+ profiles plus autonomous sourcing agents.',
+  },
+  kinelo: {
+    name: 'Kinelo',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.kinelo.com',
+    summary:
+      'AI intelligence layer that coordinates hybrid human/AI engineering teams — surfacing risks, assigning tasks, and keeping projects on track toward commitments.',
   },
   lattice: {
     name: 'Lattice',
@@ -540,6 +743,27 @@ export const companies: Record<string, Company> = {
     summary:
       'Rideshare platform offering on-demand rides, plus bike and scooter rentals, across North America.',
   },
+  magical: {
+    name: 'Magical',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.getmagical.com',
+    summary:
+      'Browser extension for text expansion and autofill that automates repetitive data entry across web apps like CRMs, ATSs, and spreadsheets.',
+  },
+  marble: {
+    name: 'Marble',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.checkmarble.com',
+    summary:
+      'No-code fraud detection and AML compliance platform for banks, fintechs, and crypto exchanges, letting teams build transaction-monitoring rules and screening without heavy engineering.',
+  },
+  metriport: {
+    name: 'Metriport',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.metriport.com',
+    summary:
+      'Open-source health data API that aggregates medical records from EHRs and other sources for healthcare developers building patient-data products.',
+  },
   mintlify: {
     name: 'Mintlify',
     scraper: 'AshbyScraper',
@@ -547,12 +771,26 @@ export const companies: Record<string, Company> = {
     summary:
       'Documentation platform that helps developers and companies build and maintain AI-searchable knowledge bases and API docs, used by over 20,000 companies.',
   },
+  mintmcp: {
+    name: 'MintMCP',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.mintmcp.com',
+    summary:
+      'Enterprise governance and gateway platform that secures, monitors, and audits AI agents and MCP servers connecting to a company\'s internal data and SaaS tools.',
+  },
   miro: {
     name: 'Miro',
     scraper: 'AshbyScraper',
     homepage: 'https://miro.com',
     summary:
       'Online collaborative whiteboard and innovation workspace for brainstorming, diagramming, and workshops.',
+  },
+  mixpanel: {
+    name: 'Mixpanel',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://mixpanel.com',
+    summary:
+      'Product analytics platform for tracking user behavior, funnels, and retention across web and mobile apps.',
   },
   modal: {
     name: 'Modal',
@@ -610,12 +848,40 @@ export const companies: Record<string, Company> = {
     summary:
       'Web development platform for building, deploying, and hosting modern websites and web apps.',
   },
+  neuralink: {
+    name: 'Neuralink',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://neuralink.com',
+    summary:
+      'Brain-computer interface company developing implantable devices to let people control computers directly with their neural activity.',
+  },
+  nooks: {
+    name: 'Nooks',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.nooks.ai',
+    summary:
+      'AI sales platform built around an AI-powered parallel dialer, call research, and a virtual salesfloor for B2B outbound sales teams.',
+  },
   notion: {
     name: 'Notion',
     scraper: 'AshbyScraper',
     homepage: 'https://www.notion.com',
     summary:
       'All-in-one AI workspace combining notes, docs, wikis, project management, and databases.',
+  },
+  numeric: {
+    name: 'Numeric',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.numeric.io',
+    summary:
+      'AI-powered accounting close platform that automates reconciliations, flux analysis, and month-end close workflows for finance teams.',
+  },
+  nuna: {
+    name: 'Nuna Inc.',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.nuna.com',
+    summary:
+      'Healthcare data technology company that builds data platforms for payers and providers to measure and improve the cost and quality of care.',
   },
   nvidia: {
     name: 'NVIDIA',
@@ -687,12 +953,26 @@ export const companies: Record<string, Company> = {
     summary:
       'Visual discovery platform where users find and save ideas for recipes, style, home design, and more.',
   },
+  plaid: {
+    name: 'Plaid',
+    scraper: 'AshbyScraper',
+    homepage: 'https://plaid.com',
+    summary:
+      'Financial data network providing APIs that let apps securely connect to users\' bank accounts for payments, lending, and identity verification.',
+  },
   planetscale: {
     name: 'PlanetScale',
     scraper: 'GreenhouseScraper',
     homepage: 'https://planetscale.com',
     summary:
       'Managed database company, founded by the co-creators of Vitess, offering fast and scalable cloud hosting for MySQL/Vitess and Postgres.',
+  },
+  plaud: {
+    name: 'Plaud',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.plaud.ai',
+    summary:
+      'Maker of AI-powered wearable voice recorders (Plaud Note/Pin) that transcribe and summarize conversations and meetings.',
   },
   posthog: {
     name: 'PostHog',
@@ -701,12 +981,26 @@ export const companies: Record<string, Company> = {
     summary:
       'Open-source, all-in-one platform for product engineers: analytics, session replay, feature flags, experiments, and error tracking.',
   },
+  postman: {
+    name: 'Postman',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.postman.com',
+    summary:
+      'API platform for building, testing, documenting, and collaborating on APIs.',
+  },
   purestorage: {
     name: 'Pure Storage',
     scraper: 'GreenhouseScraper',
     homepage: 'https://www.purestorage.com',
     summary:
       'Enterprise data storage company known for all-flash arrays and its Evergreen storage-as-a-service model.',
+  },
+  pylon: {
+    name: 'Pylon',
+    scraper: 'AshbyScraper',
+    homepage: 'https://usepylon.com',
+    summary:
+      'B2B customer support platform built around shared Slack/Teams channels, tickets, and an AI copilot for support teams.',
   },
   quora: {
     name: 'Quora',
@@ -799,6 +1093,13 @@ export const companies: Record<string, Company> = {
     summary:
       'AI data foundry providing training-data labeling, evaluation, and full-stack AI solutions for frontier labs, enterprises, and governments.',
   },
+  sentry: {
+    name: 'Sentry',
+    scraper: 'AshbyScraper',
+    homepage: 'https://sentry.io',
+    summary:
+      'Application monitoring platform for error tracking, performance monitoring, and debugging.',
+  },
   serval: {
     name: 'Serval',
     scraper: 'AshbyScraper',
@@ -819,6 +1120,13 @@ export const companies: Record<string, Company> = {
     homepage: 'https://sierra.ai',
     summary:
       'AI startup founded by Bret Taylor and Clay Bavor that builds conversational customer-service AI agents for enterprises like SoFi, Discord, and ADT.',
+  },
+  sift: {
+    name: 'Sift',
+    scraper: 'AshbyScraper',
+    homepage: 'https://sift.com',
+    summary:
+      'Digital trust and safety platform using machine learning to detect fraud, account takeover, and abuse in real time.',
   },
   snowflake: {
     name: 'Snowflake',
@@ -841,12 +1149,26 @@ export const companies: Record<string, Company> = {
     summary:
       'Aerospace manufacturer and launch provider that builds the Falcon 9/Heavy rockets, Dragon/Starship spacecraft, and the Starlink satellite internet constellation. First private company to achieve orbital rocket reuse.',
   },
+  span: {
+    name: 'Span',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.span.io',
+    summary:
+      'Smart electrical panel maker enabling homeowners to monitor and control home energy use, EV charging, solar, and battery backup.',
+  },
   spotify: {
     name: 'Spotify',
     scraper: 'LeverScraper',
     homepage: 'https://www.spotify.com',
     summary:
       "The world's largest audio streaming service for music, podcasts, and audiobooks.",
+  },
+  sprig: {
+    name: 'Sprig',
+    scraper: 'AshbyScraper',
+    homepage: 'https://sprig.com',
+    summary:
+      'Product experience platform offering in-product surveys, user testing, and session replay to gather real-time user feedback.',
   },
   squarespace: {
     name: 'Squarespace',
@@ -868,6 +1190,13 @@ export const companies: Record<string, Company> = {
     homepage: 'https://supabase.com',
     summary:
       'Open-source Firebase alternative: a Postgres development platform with built-in auth, storage, realtime, and edge functions.',
+  },
+  sydecar: {
+    name: 'Sydecar',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.sydecar.io',
+    summary:
+      'Back-office platform for venture investors that automates SPV and fund formation, banking, compliance, and reporting.',
   },
   tailscale: {
     name: 'Tailscale',
@@ -918,6 +1247,20 @@ export const companies: Record<string, Company> = {
     summary:
       'Amazon-owned live streaming platform centered on video games and interactive content.',
   },
+  unify: {
+    name: 'Unify',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.unifygtm.com',
+    summary:
+      'Go-to-market platform combining buyer-intent signals, AI-driven prospecting, and personalized outbound engagement to power "warm outbound" sales.',
+  },
+  valon: {
+    name: 'Valon',
+    scraper: 'AshbyScraper',
+    homepage: 'https://valon.com',
+    summary:
+      'Residential mortgage servicer and lender building a modern, digital-first homeowner servicing experience.',
+  },
   vanta: {
     name: 'Vanta',
     scraper: 'AshbyScraper',
@@ -946,12 +1289,26 @@ export const companies: Record<string, Company> = {
     summary:
       'Visual web development platform for designing, building, and hosting production websites without writing code.',
   },
+  weekend: {
+    name: 'Weekend',
+    scraper: 'AshbyScraper',
+    homepage: 'https://www.weekend.com',
+    summary:
+      'Voice-controlled, TV-based gaming platform that lets families play trivia and party games together on Roku, Fire TV, and smart TVs.',
+  },
   'wispr-flow': {
     name: 'Wispr Flow',
     scraper: 'AshbyScraper',
     homepage: 'https://wisprflow.ai',
     summary:
       'AI voice dictation app that turns speech into polished, formatted text in any application across Mac, Windows, and mobile.',
+  },
+  workato: {
+    name: 'Workato',
+    scraper: 'GreenhouseScraper',
+    homepage: 'https://www.workato.com',
+    summary:
+      'Enterprise integration and workflow automation platform (iPaaS) that connects apps and automates business processes.',
   },
   xai: {
     name: 'xAI',
@@ -973,6 +1330,13 @@ export const companies: Record<string, Company> = {
     homepage: 'https://zapier.com',
     summary:
       "No-code automation platform connecting 9,000+ apps through automated workflows ('Zaps'), plus AI agents and orchestration tools.",
+  },
+  zip: {
+    name: 'Zip',
+    scraper: 'AshbyScraper',
+    homepage: 'https://zip.com',
+    summary:
+      'AI-powered procurement orchestration platform giving companies a single front door for purchasing requests, approvals, and procure-to-pay workflows.',
   },
   zscaler: {
     name: 'Zscaler',

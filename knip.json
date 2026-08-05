@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
     "src/{docs,server,ui}/index.{ts,tsx}",
-    "src/.scripts/*.ts",
+    "src/.scripts/*.{js,ts}",
     "src/**/*.test.ts"
   ],
   "project": ["src/**/*.{ts,tsx}"],
