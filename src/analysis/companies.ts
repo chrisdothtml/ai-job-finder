@@ -643,7 +643,7 @@ export const companies: Record<string, Company> = {
     scraper: 'AshbyScraper',
     homepage: 'https://hyperspell.com',
     summary:
-      'Context and memory layer for AI agents that indexes a company\'s connected tools and documents into a memory graph agents can query for grounded, up-to-date context.',
+      "Context and memory layer for AI agents that indexes a company's connected tools and documents into a memory graph agents can query for grounded, up-to-date context.",
   },
   idler: {
     name: 'Idler',
@@ -776,7 +776,7 @@ export const companies: Record<string, Company> = {
     scraper: 'AshbyScraper',
     homepage: 'https://www.mintmcp.com',
     summary:
-      'Enterprise governance and gateway platform that secures, monitors, and audits AI agents and MCP servers connecting to a company\'s internal data and SaaS tools.',
+      "Enterprise governance and gateway platform that secures, monitors, and audits AI agents and MCP servers connecting to a company's internal data and SaaS tools.",
   },
   miro: {
     name: 'Miro',
@@ -958,7 +958,7 @@ export const companies: Record<string, Company> = {
     scraper: 'AshbyScraper',
     homepage: 'https://plaid.com',
     summary:
-      'Financial data network providing APIs that let apps securely connect to users\' bank accounts for payments, lending, and identity verification.',
+      "Financial data network providing APIs that let apps securely connect to users' bank accounts for payments, lending, and identity verification.",
   },
   planetscale: {
     name: 'PlanetScale',

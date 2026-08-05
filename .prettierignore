@@ -4,3 +4,4 @@ node_modules
 # generated output
 docs
 !src/docs
+public/bundles
