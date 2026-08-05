@@ -142,6 +142,7 @@ export class Manager {
 
   private async analyze(settings: AnalyzerSettings, signal: AbortSignal) {
     const { companiesList } = settings;
+    companiesList.sort((a, b) => a.localeCompare(b));
 
     // convos dir is just for analyzing the convos of the past run
     await fs.rm(convosDir, { recursive: true, force: true });
